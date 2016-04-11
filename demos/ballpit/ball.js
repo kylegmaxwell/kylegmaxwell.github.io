@@ -1,6 +1,15 @@
 'use strict';
 
 var BALL_INDEX = 0;
+var colors = [
+    [0.9,0.1,0.1],//red
+    [0.9,0.5,0.1],//orange
+    [0.9,0.9,0.1],//yellow
+    [0.1,0.9,0.1],//green
+    [0.1,0.1,0.9],//blue
+    [0.5,0.1,0.9]//purple
+];
+var NUM_GROUPS = colors.length;
 
 /**
  * Create a ball object from given data.
@@ -18,8 +27,13 @@ function Ball(world, x, y) {
 
     // Static color counter
     this.index = BALL_INDEX++;
-
+    this.group = Math.floor(Math.random()*NUM_GROUPS);
     this.setupColor();
+}
+
+// This function must be called to remove the corresponding body from the simulation world
+Ball.prototype.destroy = function () {
+    this.world.DestroyBody(this.body);
 }
 
 // Create a circle body
@@ -60,16 +74,12 @@ Ball.prototype.draw = function (ctx) {
     ctx.arc(this.pos.x, this.pos.y, this.r, 0, 2*Math.PI);
     ctx.fill();
 
-};
+    // Debug draw index
+    // ctx.font="12px Georgia";
+    // ctx.fillStyle = "gray";
+    // ctx.fillText(this.index,this.pos.x-0.5*this.r, this.pos.y+0.5*this.r);
 
-var colors = [
-    [0.9,0.1,0.1],//red
-    [0.9,0.5,0.1],//orange
-    [0.9,0.9,0.1],//yellow
-    [0.1,0.9,0.1],//green
-    [0.1,0.1,0.9],//blue
-    [0.5,0.1,0.9]//purple
-];
+};
 
 /**
  * Convert color component from 0-1 to 0-255
@@ -85,7 +95,7 @@ Ball.prototype.asColorInt = function (c) {
  * @return {String}   r, g, b, a color
  */
 Ball.prototype.setupColor = function() {
-    var colorFloat = colors[this.index%colors.length];
+    var colorFloat = colors[this.group];//this.index%colors.length
     var color = [
         this.asColorInt(colorFloat[0]),
         this.asColorInt(colorFloat[1]),
@@ -93,6 +103,6 @@ Ball.prototype.setupColor = function() {
     ];
     var alpha = 1.0;
     this.colorStr = "rgba("+color[0]+","+color[1]+","+color[2]+","+alpha+")";
-    var offset = 100;
+    var offset = 200;
     this.selectedColorStr = "rgba("+(color[0]+offset)+","+(color[1]+offset)+","+(color[2]+offset)+","+alpha+")";
 };

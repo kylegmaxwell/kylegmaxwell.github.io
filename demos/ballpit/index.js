@@ -16,6 +16,7 @@ function handleLoad() {
 
 var inDrag = false;
 function handleMouse(e) {
+    e.preventDefault();
     var x = e.offsetX;
     var y = e.offsetY;
     if (e.type === 'mousedown') {
@@ -23,6 +24,8 @@ function handleMouse(e) {
     } else if (e.type === 'mouseup') {
         inDrag = false;
         controller.setMouse(x, y);
+        controller.clearCanvas();
+        controller.render();
     }
     if (inDrag) {
         // render();

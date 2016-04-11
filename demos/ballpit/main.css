@@ -33,3 +33,14 @@ input.text {
     padding-left: 1.0em;
     width: 100px;
 }
+
+img.tile {
+    height:1.0em;
+    width: auto;
+    border-radius: 2px;
+    transform: scale(0.9,0.9);
+    transition: transform 0.25s;
+}
+img.tile:hover {
+  transform: scale(1.0,1.0);
+}
