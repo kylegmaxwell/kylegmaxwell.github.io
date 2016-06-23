@@ -2,21 +2,22 @@
 
 var BALL_INDEX = 0;
 var colors = [
+    [0.9,0.9,0.9],//white
+    [0.1,0.9,0.1],//green
+    [0.5,0.1,0.9],//purple
     [0.9,0.1,0.1],//red
     [0.9,0.5,0.1],//orange
     [0.9,0.9,0.1],//yellow
-    [0.1,0.9,0.1],//green
-    [0.1,0.1,0.9],//blue
-    [0.5,0.1,0.9]//purple
+    [0.1,0.1,0.9]//blue
 ];
-var NUM_GROUPS = colors.length;
 
 /**
  * Create a ball object from given data.
  */
-function Ball(world, x, y) {
+function Ball(world, x, y, group, density) {
     this.world = world;
-    this.body = this.createCircle(x, y);
+    this.body = this.createCircle(x, y, density);
+
     this.body.m_userData = this; // used for reverse collision lookup
     this.shape = this.body.GetShapeList();
     this.pos = this.shape.m_position;
@@ -24,10 +25,10 @@ function Ball(world, x, y) {
 
     // when the user clicks the ball is colored differently
     this.selected = false;
-
+    this.goal = null;
     // Static color counter
     this.index = BALL_INDEX++;
-    this.group = Math.floor(Math.random()*NUM_GROUPS);
+    this.group = group;
     this.setupColor();
 }
 
@@ -37,12 +38,13 @@ Ball.prototype.destroy = function () {
 }
 
 // Create a circle body
-Ball.prototype.createCircle = function (x, y) {
+Ball.prototype.createCircle = function (x, y, density) {
     var circleSd = new b2CircleDef();
-    circleSd.density = 1.0;
+    circleSd.density = density != null ? density :  1.0;
     circleSd.radius = 10;
     circleSd.restitution = 0.5;
     circleSd.friction = 0.5;
+    this.def = circleSd;
     var circleBd = new b2BodyDef();
     circleBd.AddShape(circleSd);
     circleBd.position.Set(x,y);

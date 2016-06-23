@@ -8,7 +8,7 @@ var controller = null;
 function handleLoad() {
 
     controller = new Controller(gameCanvas);
-
+    gameCanvas.oncontextmenu = function (e) { handleMouse(e); };
     gameCanvas.addEventListener('mousedown', handleMouse, false);
     gameCanvas.addEventListener('mousemove', handleMouse, false);
     gameCanvas.addEventListener('mouseup', handleMouse, false);
@@ -21,15 +21,35 @@ function handleMouse(e) {
     var y = e.offsetY;
     if (e.type === 'mousedown') {
         inDrag = true;
+        if (e.button === 0) {
+            controller.game.destroyByPosition(x, y);
+        }
+        if (e.button === 1) {
+            controller.game.initMouseCollider();
+        }
+        if (e.button === 2) {
+            controller.game.selectByPosition(x, y);
+        }
     } else if (e.type === 'mouseup') {
         inDrag = false;
-        controller.setMouse(x, y);
-        controller.clearCanvas();
-        controller.render();
+        if (e.button === 0) {
+            controller.game.removeSelection(x, y);
+        }
+        if (e.button === 1) {
+            controller.game.destroyMouseCollider();
+        }
+        if (e.button === 2) {
+            controller.game.removeSelection(x, y);
+        }
     }
-    if (inDrag) {
-        // render();
+    if (inDrag && e.button === 1) {
+        controller.game.updateMouseCollider(x, y);
     }
+    if (inDrag && e.button === 2) {
+        controller.game.updateSelectionGoal(x, y);
+    }
+    controller.clearCanvas();
+    controller.render();
 }
 
 
@@ -42,21 +62,16 @@ function Controller(canvas) {
 
     this.ctx = this.canvas.getContext('2d');
 
-    this.mouseX = 0;
-    this.mouseY = 0;
-
-    this.renderAnimation = new Animation(this.step.bind(this), 30);
-    this.createAnimation = new Animation(this.create.bind(this), 10);
+    this.animations = [
+        new Animation(this.step.bind(this), 30),
+        new Animation(this.create.bind(this), 2),
+        new Animation(this.speedUp.bind(this), 0.05),
+        new Animation(this.addColor.bind(this), 0.1, 3000)
+    ];
+    this.createAnimation = this.animations[1];
 
     this.reset();
     this.start();
-}
-
-Controller.prototype.setMouse = function (x, y) {
-    this.mouseX = x;
-    this.mouseY = y;
-    this.game.click(this.mouseX, this.mouseY);
-    this.render();
 }
 
 Controller.prototype.setupCanvas = function () {
@@ -71,20 +86,24 @@ Controller.prototype.clearCanvas = function () {
 };
 
 Controller.prototype.stop = function () {
-    if (this.renderAnimation) {
-        this.renderAnimation.stop();
-    }
-    if (this.createAnimation) {
-        this.createAnimation.stop();
+    for (var i=0;i<this.animations.length;i++) {
+        this.animations[i].stop();
     }
 }
 
 Controller.prototype.start = function () {
-    if (this.renderAnimation) {
-        this.renderAnimation.start();
+    for (var i=0;i<this.animations.length;i++) {
+        this.animations[i].start();
     }
-    if (this.createAnimation) {
-        this.createAnimation.start();
+}
+
+Controller.prototype.addColor = function () {
+    this.game.numGroups += 1;
+}
+
+Controller.prototype.speedUp = function () {
+    if (this.createAnimation.fps < 5) {
+        this.createAnimation.fps += 1;
     }
 }
 
@@ -105,7 +124,7 @@ Controller.prototype.step = function (dt) {
     // convert from ms to seconds
     // maximum time step prevents huge values when switching tabs
     var timeStep = dt != null ? Math.min(dt*0.001,0.1) : 1.0/60;
-    var iteration = 1;
+    var iteration = 5;
     this.game.step(timeStep, iteration);
     this.clearCanvas();
     this.render();

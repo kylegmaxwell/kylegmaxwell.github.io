@@ -1,34 +1,37 @@
 'use strict';
 
-function Animation(callback, fps) {
-    this.frameRequest = null;
-    this.lastFrameTime = performance.now();
+function Animation(callback, fps, offset) {
+    this._frameRequest = null;
     // Rendering is throttled to this frame rate
-    this.FPS = fps != null ? fps : 30;
-    this.callback = callback;
+    this._fps = fps != null ? fps : 30;
+    this._callback = callback;
+    this._offset = 0;
+    if (! isNaN(offset)) {
+        this._offset = offset;
+    }
+    this._lastFrameTime = performance.now() + this._offset;
 }
 
 Animation.prototype.renderLoop = function () {
     var currentTime = performance.now();
-    var dt = currentTime - this.lastFrameTime;
-    // Throttle it to specified FPS
-    if (dt > 1000/this.FPS) {
-        this.callback(dt);
-        this.lastFrameTime = currentTime;
+    var dt = currentTime - this._lastFrameTime;
+    if (dt > 1000/this._fps ) {
+        this._callback(dt);
+        this._lastFrameTime = currentTime;
     }
-    this.frameRequest = requestAnimationFrame(this.renderLoop.bind(this));
+    this._frameRequest = requestAnimationFrame(this.renderLoop.bind(this));
 };
 
 Animation.prototype.start = function () {
-    if (this.frameRequest == null) {
-        this.lastFrameTime = performance.now();
-        this.frameRequest = requestAnimationFrame(this.renderLoop.bind(this));
+    if (this._frameRequest == null) {
+        this._lastFrameTime = performance.now();
+        this._frameRequest = requestAnimationFrame(this.renderLoop.bind(this));
     }
 };
 
 Animation.prototype.stop = function () {
-    if (this.frameRequest != null) {
-        cancelAnimationFrame(this.frameRequest);
+    if (this._frameRequest != null) {
+        cancelAnimationFrame(this._frameRequest);
     }
-    this.frameRequest = null;
+    this._frameRequest = null;
 };
