@@ -1,0 +1,29 @@
+{
+  "name": "kylegmaxwell.github.io",
+  "version": "0.1.0",
+  "description": "Kyle Maxwell's personal website",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylegmaxwell/kylegmaxwell.github.io.git"
+  },
+  "keywords": [
+    "3D",
+    "Website",
+    "Person",
+    "Graphics",
+    "Software"
+  ],
+  "author": "Kyle Maxwell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kylegmaxwell/kylegmaxwell.github.io/issues"
+  },
+  "homepage": "https://github.com/kylegmaxwell/kylegmaxwell.github.io#readme",
+  "devDependencies": {
+    "express": "^4.14.0"
+  }
+}

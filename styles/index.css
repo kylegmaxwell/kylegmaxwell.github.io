@@ -28,7 +28,7 @@ img.tile {
 img.tile:hover {
   transform: scale(1.0,1.0);
 }
-div.center {
+.center {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
@@ -37,6 +37,9 @@ div.center {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .item {
     order: 1;

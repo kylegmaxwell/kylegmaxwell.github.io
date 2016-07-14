@@ -1,6 +1,7 @@
 /* Shared style sheet for index pages */
 body {
-    background-color: #A1B0C6
+    background-color: #A1B0C6;
+    background-image: url("../images/clouds.jpg");
 }
 main {
     min-width: 400px;
@@ -8,7 +9,6 @@ main {
     min-height: 400px;
 }
 section {
-    background-color: #DFE7F8;
     border-radius: 8px;
     padding: 1.0em;
     margin: 1.0em;
