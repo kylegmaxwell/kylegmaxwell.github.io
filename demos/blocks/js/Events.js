@@ -4,6 +4,7 @@ function Events(initProject) {
     this.inPort = null;
     this.outPort = null;
     this.raycaster = new THREE.Raycaster();
+    this.raycaster.linePrecision = 0.0; // ignore lines
     this.mouse = new THREE.Vector2();;
 
     this.render = function () {
@@ -19,8 +20,15 @@ function Events(initProject) {
         this.mouse.y = - ( event.layerY / this.project.height ) * 2 + 1;
         this.raycaster.setFromCamera( this.mouse, this.project.camera );
         var intersects = this.raycaster.intersectObjects( this.project.scene.children, true );
-        if (intersects.length >0) {
+        if (intersects.length > 0) {
             var obj = intersects[0].object;
+            for ( var i = 0; i < intersects.length; i++ ) {
+                // Block has priority over ports when overlapping
+                if (intersects[i].object.userData.type==='block') {
+                    obj = intersects[i].object;
+                    break;
+                }
+            }
             this.handleSelect(obj);
         }
         else {
