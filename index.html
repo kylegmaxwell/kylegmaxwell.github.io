@@ -7,27 +7,22 @@
     <title>Kyle G Maxwell</title>
     <link rel="stylesheet" type="text/css" href="styles/main.css">
     <link rel="stylesheet" type="text/css" href="styles/index.css">
+    <link rel="stylesheet" type="text/css" href="styles/icon.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+    <script src="src/index.js"></script>
 </head>
-<body onload="populateContent()">
+<body onload="handleLoad()">
+    <main>
     <header>
         <h1>Welcome, Bienvenido.</h1>
     </header>
-    <main>
         <div class="center">
             Tap on the tiles below to check out my projects and experiments.<br>
             If you have feedback on an app feel free to contact me on social media or github.<br>
             -kyle maxwell
         </div>
-        <section class="container">
-
-            <div class="item"><a href="https://www.linkedin.com/in/kylegmaxwell" title="my resume"><img class="tile" src="images/kyle-maxwell.jpg"></a></div>
-            <div class="item"><a href="http://www.panoramio.com/user/15624?show=best" title="my photos"><img class="tile" src="images/tile-panoramio.png"></a></div>
-            <div class="item"><a href="https://vimeo.com/118302345" title="my fx demo reel"><img class="tile" src="images/tile-vimeo.png"></a></div>
-            <div class="item"><a href="demos/fractal/index.html" title="interactive fractal app"><img class="tile" src="images/tile-fractal.jpg"></a></div>
-            <div class="item"><a href="demos/ballpit/index.html" title="box2d physics experiment"><img class="tile" src="images/tile-ballpit.png"></a></div>
-            <div class="item"><a href="https://time-sweeper.herokuapp.com" title="game app with oauth login"><img class="tile" src="images/tile-timesweeper.png"></a></div>
-            <div class="item"><a href="https://slice-check.herokuapp.com" title="visualize medical data"><img class="tile" src="images/slice-check.png"></a></div>
+        <section class="container" id="tilesContainer">
+            <!-- Dynamic content filled by src/index.js -->
         </section>
 
         <section style="display:none;">
@@ -51,51 +46,5 @@
     <footer>
 </body>
     <script>
-        var socialNetworks = {
-            // 'kyle-maxwell': { url: 'http://kylegmaxwell.com/'},
-            'linkedin': { url: 'https://www.linkedin.com/in/kylegmaxwell'},
-            'facebook': { url: 'https://www.facebook.com/kyle.g.maxwell'},
-            'twitter': { url: 'https://twitter.com/kylutofu'},
-            'panoramio': { url: 'http://www.panoramio.com/user/15624'},
-            'vimeo': { url: 'https://vimeo.com/kylegmaxwell'},
-            'github': { url: 'https://github.com/kylegmaxwell'},
-            'googleplus': { url: 'https://plus.google.com/+KyleMaxwellG'}
-
-        };
-
-        // Automatically create links and images for social networks
-        function populateContent() {
-            var container = document.querySelector("#networksContainer");
-            var networks = Object.keys(socialNetworks);
-            var len = networks.length;
-            // Iterate over networks and generate tags
-            for (var i=0; i<len; i++) {
-                var name = networks[i];
-                var url = socialNetworks[name].url;
-
-                // Create and attach link element
-                var link = document.createElement('a');
-                link.href = url;
-                container.appendChild(link);
-                link.title = 'Kyle Maxwell on '+name+'.';
-
-                // Create and attach image element
-                var image = document.createElement('img');
-                image.src = 'images/'+name+'.png';
-                link.appendChild(image);
-                image.classList.add("icon");
-            }
-        }
     </script>
 </html>
-
-
-
-
-
-
-
-
-
-
-

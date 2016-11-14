@@ -6,13 +6,8 @@ footer {
     margin-left: -60px;
 }
 #networksContainer {
-position: relative;
-height: auto;
-}
-.icon {
-    height: 16px;
-    width: 16px;
-    padding: 2px;
+    position: relative;
+    height: auto;
 }
 img.profile {
     width: 100px;
