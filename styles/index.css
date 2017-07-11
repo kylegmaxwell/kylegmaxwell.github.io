@@ -54,10 +54,12 @@ span.title {
 }
 a {
     color: black;
+    transition: color 0.25s;
+}
 }
 a:visited {
     color: black;
 }
 a:hover {
-    color: #222266;
+    color: #112266;
 }

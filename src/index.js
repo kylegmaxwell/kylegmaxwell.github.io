@@ -41,7 +41,7 @@ function populateFooter() {
 var links = [
     {
         "url": "https://www.linkedin.com/in/kylegmaxwell",
-        "title": "resume",
+        "title": "résumé",
         "img": "kyle-maxwell.jpg"
     },{
         "url": "https://www.flickr.com/photos/144961250@N05/albums/72157673757340230",
@@ -52,11 +52,11 @@ var links = [
         "title": "fx demo reel",
         "img": "tile-vimeo.png"
     },{
-        "url": "demos/fractal/index.html",
+        "url": "demos/fractal/",
         "title": "interactive fractal app",
         "img": "tile-fractal.jpg"
     },{
-        "url": "demos/ballpit/index.html",
+        "url": "demos/ballpit/",
         "title": "box2d physics experiment",
         "img": "tile-ballpit.png"
     },{

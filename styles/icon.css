@@ -1,6 +1,12 @@
 
 .icon {
-    height: 16px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
     padding: 2px;
+    vertical-align: middle;
+    transform: scale(0.95,0.95);
+    transition: transform 0.25s;
+}
+.icon:hover {
+  transform: scale(1.0,1.0);
 }
