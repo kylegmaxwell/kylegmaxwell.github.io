@@ -41,15 +41,15 @@ function populateFooter() {
 var links = [
     {
         "url": "https://www.linkedin.com/in/kylegmaxwell",
-        "title": "my resume",
+        "title": "resume",
         "img": "kyle-maxwell.jpg"
     },{
         "url": "https://www.flickr.com/photos/144961250@N05/albums/72157673757340230",
-        "title": "my photos",
+        "title": "photos",
         "img": "tile-flickr.png"
     },{
         "url": "https://vimeo.com/118302345",
-        "title": "my fx demo reel",
+        "title": "fx demo reel",
         "img": "tile-vimeo.png"
     },{
         "url": "demos/fractal/index.html",
@@ -80,20 +80,27 @@ function populateContainer() {
         var url = links[i].url;
         var img = links[i].img;
 
-        var div = document.createElement('div');
-        div.classList.add('item');
-        container.appendChild(div);
 
         // Create and attach link element
         var link = document.createElement('a');
         link.href = url;
         link.title = title;
-        div.appendChild(link);
+        container.appendChild(link);
+
+        var div = document.createElement('div');
+        div.classList.add('item');
+        link.appendChild(div);
 
         // Create and attach image element
         var image = document.createElement('img');
         image.src = 'images/'+img;
         image.classList.add('tile');
-        link.appendChild(image);
+        div.appendChild(image);
+
+        var span = document.createElement('span');
+        var text = document.createTextNode(title);
+        span.classList.add('title');
+        span.appendChild(text);
+        div.appendChild(span);
     }
 }

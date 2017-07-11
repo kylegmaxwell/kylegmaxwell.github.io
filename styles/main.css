@@ -4,7 +4,6 @@ body {
     background-image: url("../images/clouds.jpg");
 }
 main {
-    min-width: 400px;
     max-width: 1200px;
     min-height: 400px;
 }
@@ -24,4 +23,7 @@ a:visited {
 canvas {
     background-color: #1A2326;
     border-radius: 8px;
+}
+.welcome {
+    width: 50%;
 }
