@@ -29,28 +29,28 @@ b2Pair.prototype =
 {
 
 
-	SetBuffered: function()	{ this.status |= b2Pair.e_pairBuffered; },
-	ClearBuffered: function()	{ this.status &= ~b2Pair.e_pairBuffered; },
-	IsBuffered: function(){ return (this.status & b2Pair.e_pairBuffered) == b2Pair.e_pairBuffered; },
+    SetBuffered: function()    { this.status |= b2Pair.e_pairBuffered; },
+    ClearBuffered: function()    { this.status &= ~b2Pair.e_pairBuffered; },
+    IsBuffered: function(){ return (this.status & b2Pair.e_pairBuffered) == b2Pair.e_pairBuffered; },
 
-	SetRemoved: function()		{ this.status |= b2Pair.e_pairRemoved; },
-	ClearRemoved: function()	{ this.status &= ~b2Pair.e_pairRemoved; },
-	IsRemoved: function(){ return (this.status & b2Pair.e_pairRemoved) == b2Pair.e_pairRemoved; },
+    SetRemoved: function()        { this.status |= b2Pair.e_pairRemoved; },
+    ClearRemoved: function()    { this.status &= ~b2Pair.e_pairRemoved; },
+    IsRemoved: function(){ return (this.status & b2Pair.e_pairRemoved) == b2Pair.e_pairRemoved; },
 
-	SetFinal: function()		{ this.status |= b2Pair.e_pairFinal; },
-	IsFinal: function(){ return (this.status & b2Pair.e_pairFinal) == b2Pair.e_pairFinal; },
+    SetFinal: function()        { this.status |= b2Pair.e_pairFinal; },
+    IsFinal: function(){ return (this.status & b2Pair.e_pairFinal) == b2Pair.e_pairFinal; },
 
-	userData: null,
-	proxyId1: 0,
-	proxyId2: 0,
-	next: 0,
-	status: 0,
+    userData: null,
+    proxyId1: 0,
+    proxyId2: 0,
+    next: 0,
+    status: 0,
 
-	// STATIC
+    // STATIC
 
-	// enum
+    // enum
 
-	initialize: function() {}};
+    initialize: function() {}};
 b2Pair.b2_nullPair = b2Settings.USHRT_MAX;
 b2Pair.b2_nullProxy = b2Settings.USHRT_MAX;
 b2Pair.b2_tableCapacity = b2Settings.b2_maxPairs;

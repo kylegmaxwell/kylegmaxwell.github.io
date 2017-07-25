@@ -44,7 +44,7 @@ public class FractalApp extends JApplet
                     else
                     {
                         if (x2+y2>4)
-	                    {
+                        {
                             double j = (((double)i/(double)iter))*10000;
                             if (j>10000)
                                 j=.2;
@@ -59,11 +59,11 @@ public class FractalApp extends JApplet
                             int k=(int)(j*255.0);
                             img[r][c]=new Color(k,k,k);
                             i=iter;
-	                    }
+                        }
                         else
-                        {	y=2*x*y+a;
-		                    x=x2-y2+b;
-		                }
+                        {    y=2*x*y+a;
+                            x=x2-y2+b;
+                        }
                     }
                 }
                 a+=cstep;
@@ -90,7 +90,7 @@ public class FractalApp extends JApplet
                    g.setColor(Color.GRAY); 
                 else
                     g.setColor(img[r][c]);
-            	g.drawRect(r+10,c+10,1,1);
+                g.drawRect(r+10,c+10,1,1);
             }
         
     }

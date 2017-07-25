@@ -5,14 +5,14 @@
 
 typedef struct
 {
-	double x;
-	double y;
-	double a;
-	double b;
-	bool valid;
-	float red;
-	float green;
-	float blue;
+    double x;
+    double y;
+    double a;
+    double b;
+    bool valid;
+    float red;
+    float green;
+    float blue;
 } Location;
 
 void toNext(Location *loc);

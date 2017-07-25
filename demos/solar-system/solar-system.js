@@ -22,8 +22,8 @@ class SolarSystem
 
     getEnv()
     {
-    	return env;
-	}
+        return env;
+    }
     
     void init()    
     {

@@ -25,25 +25,25 @@ b2Settings.prototype = {
 
 
 
-	// Define your unit system here. The default system is
-	// meters-kilograms-seconds. For the tuning to work well,
-	// your dynamic objects should be bigger than a pebble and smaller
-	// than a house.
-	//static public const b2Settings.b2_lengthUnitsPerMeter = 1.0;
+    // Define your unit system here. The default system is
+    // meters-kilograms-seconds. For the tuning to work well,
+    // your dynamic objects should be bigger than a pebble and smaller
+    // than a house.
+    //static public const b2Settings.b2_lengthUnitsPerMeter = 1.0;
 
-	// Use this for pixels:
+    // Use this for pixels:
 
-	// Global tuning constants based on MKS units.
+    // Global tuning constants based on MKS units.
 
-	// Collision
+    // Collision
 
-	// Dynamics
+    // Dynamics
 
-	// Sleep
+    // Sleep
 
-	// assert
+    // assert
 
-	initialize: function() {}}
+    initialize: function() {}}
 b2Settings.USHRT_MAX = 0x0000ffff;
 b2Settings.b2_pi = Math.PI;
 b2Settings.b2_massUnitsPerKilogram = 1.0;
@@ -64,9 +64,9 @@ b2Settings.b2_timeToSleep = 0.5 * b2Settings.b2_timeUnitsPerSecond;
 b2Settings.b2_linearSleepTolerance = 0.01 * b2Settings.b2_lengthUnitsPerMeter / b2Settings.b2_timeUnitsPerSecond;
 b2Settings.b2_angularSleepTolerance = 2.0 / 180.0 / b2Settings.b2_timeUnitsPerSecond;
 b2Settings.b2Assert = function(a)
-	{
-		if (!a){
-			var nullVec;
-			nullVec.x++;
-		}
-	};
+    {
+        if (!a){
+            var nullVec;
+            nullVec.x++;
+        }
+    };
