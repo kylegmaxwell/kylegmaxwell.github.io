@@ -13,100 +13,111 @@ class Shape
     {
         this.myLeft=0;
         this.myTop=0;
-        this.myColor = Color.black;
+        this.myColor = 'black';
         this.giveID();
     }
 
     // x - double
     // y - double
-    constructor(x, y)
+    initXY(x, y)
     {
         this.setXcenter(x);
         this.setYcenter(y);
-        this.myColor = Color.black;
+        this.myColor = 'black';
         this.giveID();
+        return this;
     }
-    
+
     // x - doble
     // y - double
     // col - Color
-    constructor(x, y, col)
+    initXYColor(x, y, col)
     {
         this.myLeft = x;
         this.myTop = y;
         this.myColor = col;
         this.giveID();
+        return this
     }
-    
-    void giveID()
+
+    giveID()
     {
         this.myID=NextAvailableID++;
     }
 //accessors
-    int ID()
+    // returns int
+    ID()
     { return this.myID; }
-    
-    Color color()
+
+    // returns Color
+    color()
     { return this.myColor; }
-    
-    double left()
+
+    // returns double
+    left()
     { return this.myLeft; }
 
-    double top()
+    // returns double
+    top()
     { return this.myTop; }
-    
-    Point center()
+
+    // returns Point
+    center()
     { return new Point(this.Xcenter(),this.Ycenter()); }
 
 //mutators
     // newColor - Color
-    void setColor(newColor)
+    setColor(newColor)
     { this.myColor = newColor; }
     // amt - double
-    void moveLeft(amt)
+    moveLeft(amt)
     { this.myLeft -= amt; }
     // amt - double
-    void moveRight(amt)
+    moveRight(amt)
     { this.myLeft += amt; }
     // amt - double
-    void moveUp(amt)
+    moveUp(amt)
     { this.myTop -= amt; }
     // amt - dobule
-    void moveDown(amt)
+    moveDown(amt)
     { this.myTop += amt; }
     // newLeft - double
-    void setLeft(newLeft)
+    setLeft(newLeft)
     { this.myLeft = newLeft; }
     // newTop - double
-    void setTop(newTop)
+    setTop(newTop)
     { this.myTop = newTop; }
     // newX - double
-    void setXcenter(newX)
-    { this.myLeft = newX-(width()/2.0); }
+    setXcenter(newX)
+    { this.myLeft = newX-(this.width()/2.0); }
     // newY - double
-    void setYcenter(newY)
-    { this.myTop = newY-(height()/2.0); }
+    setYcenter(newY)
+    { this.myTop = newY-(this.height()/2.0); }
 //dependant
     // newRight - double
-    void setRight(newRight)
-    { this.myLeft = newRight-width(); }
+    setRight(newRight)
+    { this.myLeft = newRight-this.width(); }
     // newBottom - double
-    void setBottom(newBottom)
-    { this.myTop = newBottom-height(); }
+    setBottom(newBottom)
+    { this.myTop = newBottom-this.height(); }
 
-    double right()
+    // returns double
+    right()
     { return this.left()+this.width(); }
-    
-    double bottom()
+
+    // returns double
+    bottom()
     { return this.top()+this.height(); }
-    
-    double Xcenter()
+
+    // returns double
+    Xcenter()
     { return this.left()+(this.width()/2.0); }
-    
-    double Ycenter()
+
+    // returns double
+    Ycenter()
     { return this.top()+(this.height()/2.0); }
-    
-    
+
+
     // abstract double height();
     // abstract double width();
     // abstract void show(java.awt.Graphics g);

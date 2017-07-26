@@ -23,6 +23,8 @@ class Test
     static run() {
         Test.point();
         Test.vector();
+        Test.circle();
+        Test.particle();
         console.log("Tests passed")
     }
 
@@ -41,5 +43,17 @@ class Test
         let v2 = Vector.fromPolar(new Point(0,0), 1, Math.PI/2);
         Test.fuzzyEqual(v2.base(),0);
         Test.fuzzyEqual(v2.height(),1);
+    }
+
+    static circle() {
+        let c = new Circle();
+        Test.expect(c.diameter() > 0, 'Default circle has radius');
+        c.moveTo(Vector.fromDimensions(-1,1));
+        Test.equal(c.center().x, -1);
+        Test.equal(c.center().y, 1);
+    }
+
+    static particle() {
+        let p = new Particle();
     }
 }

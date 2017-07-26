@@ -17,7 +17,7 @@ class Vector
     }
     // b - double
     // h - double
-    static fromDimensions()
+    static fromDimensions(b, h)
     {
         let v = new Vector();
         v.x=b;
@@ -93,7 +93,7 @@ class Vector
     // returns Vector
     clone()
     {
-        return Vector.fromOrigin(x,y,origin);
+        return Vector.fromOrigin(this.x,this.y,this.origin);
     }
 
 //mutators

@@ -1,47 +1,53 @@
 
-// public class Particle extends Circle implements SpaceObject
+// class Particle extends Circle implements SpaceObject
 class Particle extends Circle
 {
-    // public Vector myVelocity;
-    // public DoubleNode myPos;
+    // Vector myVelocity;
+    // DoubleNode myPos;
     // private double density;
-    // public static final double G = .01;
-    const static G() {
+    // static final double G = .01;
+    static G() {
         return 0.01;
     }
 
+    constructor() {
+        super();
+        this.initPointDiameter(new Point(0,0), 10);
+    }
     // p - point
-    constructor(p)
+    initPoint(p)
     {
-        super (p,10);
+        super.initPointDiameter(p, 10);
         this.density=1;
         this.myVelocity = new Vector();
-        let myPos = null;
+        this.myPos = null;
     }
     // p - point
     // diam - double
-    constructor(p, diam)
+    initPointDiameter(p, diam)
     {
-        super(p,diam);
+        super.initPointDiameter(p, diam);
         this.density=1;
         this.myVelocity = new Vector();
         this.myPos = null;
     }
 
 //accessors
-    public double getVolume()
+    // returns double
+    getVolume()
     { return (4.0/3.0)*Math.PI*Math.pow((this.diameter()/2),3); }
-    
-    public double getMass()
+
+    // returns double
+    getMass()
     { return this.getVolume()*this.density; }
-    
+
 //mutators
     // d - double
-    public void setDensity(d)
+    setDensity(d)
     { this.density = d; }
-    
+
     // that - particle
-    public void push(that)
+    push(that)
     {
         this.push(that, 1);
     }
@@ -49,7 +55,7 @@ class Particle extends Circle
     //times is the 1 over the number of calulations per timestep
     // that - Particle
     // factor - double
-    public void push(that, factor)
+    push(that, factor)
     {
         let tis = this.center();
         let tat = that.center();
@@ -64,19 +70,20 @@ class Particle extends Circle
         //System.out.println(t.magnitude());
         this.applyForce(t);
     }
-    public void moveOn(Vector v)
+    // v - Vector
+    moveOn(v)
     {
         v.translate(this.center());
         this.moveTo(v.endPt());
     }
-    public void move()
+    move()
     {
         //if (myVelocity.magnitude()>15)
         //    myVelocity.setMagnitude(15);
-        super.move(myVelocity);
+        super.move(this.myVelocity);
     }
     // force - vector
-    public void applyForce(force)
+    applyForce(force)
     {
         //f=ma... f/m=a
         let factor = 1.0/this.getMass();
@@ -84,10 +91,11 @@ class Particle extends Circle
         //System.out.println(t.magnitude());
         this.myVelocity.add(t);
     }
-    public String toString()
+    // returns string
+    toString()
     {
         return "Particle at "+//center().toString().substring(14);
-            + this.Xcenter()+" "+this.Ycenter();    
+            + this.Xcenter()+" "+this.Ycenter();
     }
 }
 

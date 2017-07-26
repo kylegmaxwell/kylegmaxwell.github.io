@@ -1,9 +1,9 @@
 class Circle extends Shape
 {
     // private double myDiameter;
-    
+
 //Constructors
-    
+
       constructor()
     {
         super(0,0);
@@ -12,52 +12,63 @@ class Circle extends Shape
 
     // p - Point
     // diam - double
-    constructor(p, diam)
+    static fromPointDiameter(p, diam)
     {
-        super(p.x,p.y);
+        let c = new Circle();
+        c.setXcenter(p.x);
+        c.setYcenter(p.y);
+        c.myDiameter = diam;
+        return c;
+    }
+
+    initPointDiameter(p, diam)
+    {
+        this.setXcenter(p.x);
+        this.setYcenter(p.y);
         this.myDiameter = diam;
     }
-    
 //Accessors
     // returns double
-    funtion diameter()
+    diameter()
     { return this.myDiameter; }
-    
+
     // returns double
-    funtion radius()
+    radius()
     { return this.diameter()/2.0; }
-    
+
     // returns double
-    funtion height()
+    height()
     { return this.diameter(); }
-    
+
     // returns double
-    funtion width()
+    width()
     { return this.diameter(); }
     // p - Point
-    function moveTo(p)
+    moveTo(p)
     {
         this.setXcenter(p.x);
         this.setYcenter(p.y);
     }
     // v - Vector
-    function move(v)
+    move(v)
     {
         let t = v.clone();
         t.translate(this.center());//setStart
         this.moveTo(t.endPt());
     }
-    
+
 //Actions
-    function show(ctx)
+    show(ctx)
     {
+        ctx.fillStyle=this.color();
         //transform the view frame
         let d = this.diameter();// /(6*s[si]));
         let x, y;
-        x=Xcenter();
-        y=Ycenter();
+        x=this.Xcenter();
+        y=this.Ycenter();
         //TODO
         // g.fillOval((int)x,(int)y,d,d);
-        
+        ctx.arc(x, y, 0.5*d, 0, 2 * Math.PI);
+
     }
 }
