@@ -10,21 +10,32 @@ function main() {
     canvas.width = canvas.clientWidth;
 
     let ctx = canvas.getContext('2d');
-        paint(ctx, canvas.width, canvas.height, galaxy);
+    let wipeCheckbox = document.querySelector('#wipeCheckbox');
+
+    let state = {
+        width: canvas.width,
+        height: canvas.height,
+        wipe: wipeCheckbox.checked
+    };
+
+    wipeCheckbox.addEventListener('change', () => {
+        state.wipe = wipeCheckbox.checked;
+    });
+
+    paint(ctx, state, galaxy);
 }
 
 // Graphics g
-function paint(ctx, width, height, galaxy)
+function paint(ctx, state, galaxy)
 {
-    ctx.clearRect(0, 0, width, height);
+    if (state.wipe) {
+        ctx.clearRect(0, 0, state.width, state.height);
+    }
     ctx.fillStyle='black';
     galaxy.step(ctx);
-    // only draw when focused
+
     requestAnimationFrame(()=> {
-        // wait more
-        setTimeout(()=> {
-            paint(ctx, width, height, galaxy);
-        },100);
+        paint(ctx, state, galaxy);
     });
 
 }

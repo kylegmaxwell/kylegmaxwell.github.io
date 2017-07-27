@@ -3,13 +3,16 @@ class SimpleGrid
     constructor()
     {
         this.list = [];
+        // range of scales for the rendering frame
         this.s = [];
         this.s.length = 50;
         for (let i=10;i<60;i++)
         {
             this.s[i-10]=i/80.0;
         }
+        // The current scale index, can be modified externally
         this.si=this.s.length-1;
+        // Center point, used to translate rendering frame
         this.p = new Point(200,200);
     }
 
