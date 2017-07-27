@@ -67,6 +67,10 @@ var links = [
         "url": "https://slice-check.herokuapp.com",
         "title": "visualize medical data",
         "img": "slice-check.png"
+    },{
+        "url": "demos/solar-system",
+        "title": "solar system simulation",
+        "img": "tile-solar.png"
     }
 ];
 

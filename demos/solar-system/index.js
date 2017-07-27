@@ -1,6 +1,5 @@
 
 function main() {
-    console.log("INDEX");
     Test.run();
     let galaxy = new SolarSystem();
     let canvas = document.querySelector('#gravityFrame');
