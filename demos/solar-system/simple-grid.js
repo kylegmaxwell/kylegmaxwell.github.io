@@ -73,7 +73,7 @@ class SimpleGrid
                 continue;
             //objects do not interact with themselves
             //exBUG: objects in same location also do not interact with themselves
-            pq = Vector.fromEndPoints(this.p,q.center());
+            pq = Vector.fromEndPoints(p,q.center());
             let dist2 = Math.pow(pq.magnitude(),2);
             if (dist2<1)
                 dist2=1;
