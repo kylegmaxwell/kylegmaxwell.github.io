@@ -9,8 +9,11 @@ class Shape
     // public static int NextAvailableID=0;
     // private int myID;
 
-    constructor()
+    constructor(x)
     {
+        if (x != null) {
+            throw new Error('Shape has default constructor');
+        }
         this.myLeft=0;
         this.myTop=0;
         this.myColor = 'black';

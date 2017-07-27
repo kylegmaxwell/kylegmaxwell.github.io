@@ -10,26 +10,15 @@ class Particle extends Circle
         return 0.01;
     }
 
-    constructor() {
-        super();
-        this.initPointDiameter(new Point(0,0), 10);
-    }
-    // p - point
-    initPoint(p)
-    {
-        super.initPointDiameter(p, 10);
-        this.density=1;
-        this.myVelocity = new Vector();
-        this.myPos = null;
-    }
     // p - point
     // diam - double
-    initPointDiameter(p, diam)
+    constructor(p, diam)
     {
+        super();
         super.initPointDiameter(p, diam);
         this.density=1;
         this.myVelocity = new Vector();
-        this.myPos = null;
+        // this.myPos = null;
     }
 
 //accessors
@@ -65,7 +54,7 @@ class Particle extends Circle
             dist2=1;
         let mm=this.getMass()*that.getMass();
         //System.out.println(mm);
-        let t = new Vector(this.center(),Particle.G*(mm/dist2),v.angle());
+        let t = new Vector(this.center(),Particle.G()*(mm/dist2),v.angle());
         t.dilate(factor);
         //System.out.println(t.magnitude());
         this.applyForce(t);

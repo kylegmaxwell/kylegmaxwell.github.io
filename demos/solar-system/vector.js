@@ -8,8 +8,11 @@ class Vector
     // Point endPoint;
 
 //constructors
-    constructor()
+    constructor(x)
     {
+        if (x != null) {
+            throw new Error('Vector has default constructor');
+        }
         this.x=0;
         this.y=0.0;
         this.origin = new Point(0,0);

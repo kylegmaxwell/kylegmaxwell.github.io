@@ -4,9 +4,13 @@ class Circle extends Shape
 
 //Constructors
 
-      constructor()
+    constructor(x)
     {
-        super(0,0);
+        if (x != null) {
+            throw new Error('CIrcle has default constructor');
+        }
+        super();
+        super.initXY(0,0);
         this.myDiameter = 10;
     }
 

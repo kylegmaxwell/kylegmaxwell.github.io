@@ -25,6 +25,8 @@ class Test
         Test.vector();
         Test.circle();
         Test.particle();
+        Test.grid();
+        Test.solar();
         console.log("Tests passed")
     }
 
@@ -54,6 +56,14 @@ class Test
     }
 
     static particle() {
-        let p = new Particle();
+        let p = new Particle(new Point(0,0),10);
+    }
+
+    static grid() {
+        let g = new SimpleGrid();
+    }
+
+    static solar() {
+        let s = new SolarSystem();
     }
 }
