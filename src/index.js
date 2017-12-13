@@ -71,6 +71,10 @@ var links = [
         "url": "demos/solar-system",
         "title": "solar system simulation",
         "img": "tile-solar.png"
+    },{
+        "url": "demos/publications",
+        "title": "publications",
+        "img": "dl.jpg"
     }
 ];
 
