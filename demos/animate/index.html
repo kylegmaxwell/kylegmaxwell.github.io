@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Animate</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="../../styles/icon.css">
+    <link rel="shortcut icon" href="../../images/favicon.ico">
+</head>
+<body onload="handleLoad()">
+    <header>
+        <h2><a href="../.."><img class="icon" src="../../images/favicon.ico"></a> >
+        <a href="."><img class="icon" src="../../images/tile-fractal.jpg"></a> - Animate!</h2>
+    </header>
+    <main>
+        <section>
+            <details>
+                <summary>Instructions</summary>
+                Try clicking the different render modes at the bottom, then click Increment to step the model forward one iteration. But watch out, it can get slow for a large iteration number.<br/>
+            </details>
+            <!-- This is where the game canvas will be rendered -->
+            <canvas id="gameCanvas"></canvas>
+        </section>
+
+        <section>
+            <label>Resolution<input id="resInput" type="text" class="text" value="300" onblur="updateRes()"/></label><br>
+            <button type="button" id="incButton" onclick="stepIter()">Step</button>
+            <button type="button" id="playButton" onclick="playIter()">Play</button>
+            <button type="button" id="stopButton" onclick="stopIter()">Stop</button>
+            <button type="button" id="clearButton" onclick="doClear()">Clear</button>
+            <label><input id="paintCheck" type="checkbox" onchange="resetGame()">Paint Mode</label>
+        </section>
+        <a href="https://github.com/kylegmaxwell/kylegmaxwell.github.io/tree/master/demos/animate"  title="view source">
+            <img src="../../images/github.png" class="icon">
+        </a>
+
+    </main>
+
+    <script src="sylvester.js"></script>
+    <script src="util.js"></script>
+    <script src="engine.js"></script>
+    <script src="lines.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
