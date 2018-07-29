@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fluids</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="../../styles/icon.css">
+    <link rel="shortcut icon" href="../../images/favicon.ico">
+</head>
+<body>
+    <header>
+        <h2><a href="../.."><img class="icon" src="../../images/favicon.ico"></a> >
+        <a href="."><img class="icon" src="../../images/tile-fluids.png"></a> - Fluids!</h2>
+    </header>
+    <main>
+        <section>
+            <details>
+                <summary>Instructions</summary>
+                TODO.<br/>
+            </details>
+            <!-- This is where the game canvas will be rendered -->
+            <canvas id="gameCanvas"></canvas>
+        </section>
+
+        <section>
+            <label>Resolution<input id="resInput" type="text" class="text" value="300" onblur="updateRes()"/></label><br><label>Iterations<input id="iterInput" type="text" class="text" value="20" onblur="updateIter()"/></label><br>
+            <label>Render mode
+            <select id="modeSelector" onchange="resetGame()">
+              <option value="0">Density</option>
+              <option value="1">Velocity</option>
+              <option value="2">Vorticity</option>
+            </select></label><br>
+            <button type="button" id="incButton" onclick="incIter()">Increment</button>
+            <button type="button" id="playButton" onclick="playIter()">Play</button>
+            <button type="button" id="stopButton" onclick="stopIter()">Stop</button>
+            <button type="button" id="clearButton" onclick="doClear()">Clear</button>
+            <label><input id="paintCheck" type="checkbox" onchange="resetGame()">Paint Mode</label>
+        </section>
+        <a href="https://github.com/kylegmaxwell/kylegmaxwell.github.io/tree/master/demos/fluids"  title="view source">
+            <img src="../../images/github.png" class="icon">
+        </a>
+
+    </main>
+
+    <script src="index.js" type="module"></script>
+
+</body>
+</html>
