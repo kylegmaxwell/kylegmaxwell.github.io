@@ -1,6 +1,7 @@
 'use strict';
 
-import noise from './perlin.js'
+import {curl2d} from './curl.js'
+
 /**
  * Convert a number to 8 bit int.
  * @param  {Number} value Number as float
@@ -24,27 +25,25 @@ export default class Fluids {
     }
 
     /**
-     * Render the mandlebrot set
+     * Render the pixels
      * {Uint8ClampedArray} pixels The r, g, b, a pixel data (0 to 255)
      */
     render(pixels) {
         let index = 0;
         // console.log(this.height);
         // console.log(this.width);
+
         // Loop over each pixel
         for (let r=0;r<this.height;r++) {
             for (let c=0;c<this.width;c++) {
-                let value = noise(r * 0.01, c * 0.01);
-                if (c===0)
-                console.log(value);
-
-                pixels[index+0]=toFixed(value);
-                pixels[index+1]=toFixed(value);
-                pixels[index+2]=toFixed(value);
+                let curl = curl2d(0.1*r, 0.1*c);
+                count+=1;
+                pixels[index+0]=toFixed(curl[0]);
+                pixels[index+1]=toFixed(curl[1]);
+                pixels[index+2]=toFixed(curl[2]);
                 pixels[index+3]=toFixed(1);
                 index+=4;
             }
         }
-        // console.log(pixels);
     }
 }
