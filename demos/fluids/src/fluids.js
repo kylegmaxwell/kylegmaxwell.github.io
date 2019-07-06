@@ -1,6 +1,6 @@
 'use strict';
 
-import {curl2d} from './curl.js'
+import { curl2d } from './curl.js'
 
 /**
  * Convert a number to 8 bit int.
@@ -8,7 +8,7 @@ import {curl2d} from './curl.js'
  * @return {Number}       Number as 8 bit int
  */
 function toFixed(value) {
-    return Math.floor(value*255);
+    return Math.floor(value * 255);
 }
 
 /**
@@ -34,14 +34,14 @@ export default class Fluids {
         // console.log(this.width);
 
         // Loop over each pixel
-        for (let r=0;r<this.height;r++) {
-            for (let c=0;c<this.width;c++) {
-                let curl = curl2d(0.1*r, 0.1*c);
-                pixels[index+0]=toFixed(curl[0]);
-                pixels[index+1]=toFixed(curl[1]);
-                pixels[index+2]=toFixed(curl[2]);
-                pixels[index+3]=toFixed(1);
-                index+=4;
+        for (let r = 0; r < this.height; r++) {
+            for (let c = 0; c < this.width; c++) {
+                let curl = curl2d(0.1 * r, 0.1 * c);
+                pixels[index + 0] = toFixed(curl[0]);
+                pixels[index + 1] = toFixed(curl[1]);
+                pixels[index + 2] = toFixed(curl[2]);
+                pixels[index + 3] = toFixed(1);
+                index += 4;
             }
         }
     }

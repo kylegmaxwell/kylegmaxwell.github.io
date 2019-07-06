@@ -88,7 +88,7 @@ function renderLoop() {
     var currentTime = performance.now();
     var dt = currentTime - lastRenderTime;
     // Throttle it to specified FPS
-    if (dt > 1000/FPS) {
+    if (dt > 1000 / FPS) {
         if (renderObj)
             renderObj.iter++;
         iterInput.value = renderObj.iter;
@@ -119,7 +119,7 @@ function incIter() {
 }
 
 function doClear() {
-   ctx.clearRect(0,0,gameCanvas.width, gameCanvas.height);
+    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 }
 
 function resetGame() {
