@@ -35,10 +35,10 @@
                     <option value="1">Velocity</option>
                     <option value="2">Vorticity</option>
                 </select></label><br>
-            <button type="button" id="incButton" onclick="incIter()">Increment</button>
-            <button type="button" id="playButton" onclick="playIter()">Play</button>
-            <button type="button" id="stopButton" onclick="stopIter()">Stop</button>
-            <button type="button" id="clearButton" onclick="doClear()">Clear</button>
+            <button type="button" id="incButton">Increment</button>
+            <button type="button" id="playButton">Play</button>
+            <button type=" button" id="stopButton">Stop</button>
+            <button type=" button" id="clearButton">Clear</button>
             <label><input id="paintCheck" type="checkbox" onchange="resetGame()">Paint Mode</label>
         </section>
         <a href="https://github.com/kylegmaxwell/kylegmaxwell.github.io/tree/master/demos/fluids" title="view source">
@@ -50,8 +50,10 @@
     <script src="lib/gl-matrix.js"></script>
     <script src="lib/perlin.js" type="module"></script>
 
+    <script src="src/advect.js" type="module"></script>
     <script src="src/curl.js" type="module"></script>
     <script src="src/fluids.js" type="module"></script>
+    <script src="src/grid.js" type="module"></script>
     <script src="src/index.js" type="module"></script>
 
 </body>

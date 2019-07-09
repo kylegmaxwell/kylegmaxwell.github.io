@@ -4,7 +4,11 @@ import noise from '../lib/perlin.js'
 // Note gl-matrix creates a global object glMatrix
 import * as glm from '../lib/gl-matrix.js'
 
-function noise3d(x, y) {
+export function baseFrequency() {
+    return 0.001;
+}
+
+export function noise3d(x, y) {
     let v = glMatrix.vec3.create();
     v[0] = noise(x, y);
     v[1] = noise(x + 1234, y + 7777);
@@ -13,8 +17,8 @@ function noise3d(x, y) {
 }
 
 export function curl2d(x, y) {
-    const dx = 0.01;
-    const dy = 0.01;
+    const dx = baseFrequency();
+    const dy = baseFrequency();
 
     const dbdy = noise3d(x, dy + y)[2] - noise3d(x, -dy + y)[2];
     const dgdz = 0.0;

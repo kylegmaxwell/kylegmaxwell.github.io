@@ -33,6 +33,10 @@ function handleLoad() {
     gameCanvas.addEventListener('mousedown', handleMouse, false);
     gameCanvas.addEventListener('mousemove', handleMouse, false);
     gameCanvas.addEventListener('mouseup', handleMouse, false);
+    incButton.addEventListener('click', incIter);
+    stopButton.addEventListener('click', stopIter);
+    playButton.addEventListener('click', playIter);
+    clearButton.addEventListener('click', doClear);
 }
 
 var inDrag = false;
@@ -113,8 +117,7 @@ function stopIter() {
 
 function incIter() {
     if (renderObj)
-        renderObj.iter++;
-    iterInput.value = renderObj.iter;
+        renderObj.advect(1);
     render();
 }
 
