@@ -85,20 +85,30 @@ function updateRes() {
     resetGame();
 }
 
-var renderRequest = null;
-var lastRenderTime = performance.now();
-function renderLoop() {
+function step() {
+    if (!renderObj) {
+        return;
+    }
+    const currentTime = performance.now();
+    // in milli seconds
+    const dt = currentTime - lastRenderTime;
+    // no more than 1, in seconds
+    const delta = Math.min(dt / 1000, 1.0);
 
-    var currentTime = performance.now();
-    var dt = currentTime - lastRenderTime;
-    // Throttle it to specified FPS
-    if (dt > 1000 / FPS) {
-        if (renderObj)
-            renderObj.iter++;
-        iterInput.value = renderObj.iter;
+    // Wait until enough time has elapsed to render no faster than FPS
+    if (delta > 1 / FPS) {
+        renderObj.advect(delta);
+        iterInput.value += delta;
         render();
         lastRenderTime = currentTime;
     }
+}
+
+var renderRequest = null;
+var lastRenderTime = performance.now();
+function renderLoop() {
+    step();
+    render();
     renderRequest = requestAnimationFrame(renderLoop);
 }
 
@@ -116,8 +126,7 @@ function stopIter() {
 }
 
 function incIter() {
-    if (renderObj)
-        renderObj.advect(1);
+    step();
     render();
 }
 

@@ -1,8 +1,8 @@
 'use strict';
 
-import { baseFrequency, noise3d, curl2d } from './curl.js'
 import { advect as doAdvect } from './advect.js'
 import Grid from './grid.js'
+import { noise3d } from './curl.js';
 
 /**
  * Convert a number to 8 bit int.
@@ -25,6 +25,13 @@ export default class Fluids {
         // Fluid velocity
         this._velocity = Grid.makeCurlGrid(this._width, this._height);
         // Color / density
+        this._color = Grid.makeCustomGrid(this._width, this._height, (x, y) => {
+            let n = noise3d(x, y);
+            n[0] = Math.abs(n[0]);
+            n[1] = Math.abs(n[1]);
+            n[2] = Math.abs(n[2]);
+            return n;
+        });
         this._color = Grid.makeNoiseGrid(this._width, this._height);
         // Temporary buffer for advection operations
         this._swap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
@@ -38,24 +45,27 @@ export default class Fluids {
      * {Uint8ClampedArray} pixels The r, g, b, a pixel data (0 to 255)
      */
     render(pixels) {
-        // let index = 0;
         // Loop over each pixel
         for (let r = 0; r < this._height; r++) {
             for (let c = 0; c < this._width; c++) {
                 const index = 4 * this.toIndex(r, c);
-                // const sampleIndex = 3 * this.toIndex(r, c);
+                // const value = this._velocity.sample3(r, c);
                 const value = this._color.sample3(r, c);
-                // TODO use grid.sample3(r,c);
                 pixels[index + 0] = toFixed(value[0]);
                 pixels[index + 1] = toFixed(value[1]);
                 pixels[index + 2] = toFixed(value[2]);
                 pixels[index + 3] = toFixed(1);
-                // index += 4;
             }
         }
     }
 
     advect(dt) {
-        doAdvect(dt, this._width, this._height, this.colorArray, this.velocityArray);
+        // advect color into swap using velocity
+        doAdvect(dt, this._width, this._height, this._color, this._swap, this._velocity);
+        // swap pointers
+        let tmp = this._color;
+        this._color = this._swap;
+        this._swap = tmp;
+
     }
 }

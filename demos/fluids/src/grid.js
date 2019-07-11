@@ -1,20 +1,14 @@
 // Grid class module
 
-import { baseFrequency, noise3d, curl2d } from './curl.js'
+// Note gl-matrix creates a global object glMatrix
+import * as glm from '../lib/gl-matrix.js'
+
+import { noise3d, curl2d } from './curl.js'
+import { noiseFrequency } from './constants.js'
 
 function toIndexHelper(r, c, width) {
     return r * width + c;
 }
-
-function sample3Helper(r, c, width, grid) {
-    let index = 3 * toIndexHelper(r, c, width);
-    let v = glMatrix.vec3.create();
-    v[0] = grid[index + 0]
-    v[1] = grid[index + 1]
-    v[2] = grid[index + 2]
-    return v;
-}
-
 
 /**
  * Represents a 2d float32 buffer 
@@ -49,22 +43,26 @@ export default class Grid {
     // @param valueFunction (row,column)->float3
     static makeCustomGrid(width, height, valueFunction) {
         let grid = new Grid(width, height);
-        for (let r = 0; r < grid.height(); r++) {
-            for (let c = 0; c < grid.width(); c++) {
-                const index = grid.channels() * grid.toIndex(r, c, grid.width);
-                const frequency = 10.0 * baseFrequency();
-                const sampleX = frequency * c;
-                const sampleY = frequency * r;
-                const curl = valueFunction(sampleX, sampleY);
-                const vectorSize = 3;
-                for (let channel = 0; channel < grid.channels() && channel < vectorSize; channel++) {
-                    grid._dataArray[index + channel] = curl[channel];
-                }
-            }
-        }
+        grid.setCustomValues(valueFunction);
         return grid;
     }
 
+    // @param valueFunction (row,column)->float3
+    setCustomValues(valueFunction) {
+        for (let r = 0; r < this.height(); r++) {
+            for (let c = 0; c < this.width(); c++) {
+                const index = this.channels() * this.toIndex(r, c, this.width);
+                const frequency = noiseFrequency();
+                const sampleX = frequency * c;
+                const sampleY = frequency * r;
+                const vecValue = valueFunction(sampleX, sampleY);
+                const vectorSize = 3;
+                for (let channel = 0; channel < this.channels() && channel < vectorSize; channel++) {
+                    this._dataArray[index + channel] = vecValue[channel];
+                }
+            }
+        }
+    }
     width() {
         return this._width;
     }
@@ -73,14 +71,62 @@ export default class Grid {
         return this._height;
     }
 
-
     channels() {
         return this._channels;
     }
+
     toIndex(r, c) {
         return toIndexHelper(r, c, this._width);
     }
+
+    set3(r, c, value) {
+        let index = this._channels * toIndexHelper(r, c, this._width);
+        this._dataArray[index + 0] = value[0];
+        this._dataArray[index + 1] = value[1];
+        this._dataArray[index + 2] = value[2];
+    }
+
     sample3(r, c) {
-        return sample3Helper(r, c, this._width, this._dataArray);
+        // return sample3Helper(r, c, this._width, this._dataArray);
+        let index = this._channels * toIndexHelper(r, c, this._width);
+        let value = glMatrix.vec3.create();
+        if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
+            // Empty boundary condition
+            return value;
+        }
+        value[0] = this._dataArray[index + 0]
+        value[1] = this._dataArray[index + 1]
+        value[2] = this._dataArray[index + 2]
+        return value;
+    }
+
+
+    sample3Nearest(r, c) {
+        return this.sample3(
+            Math.min(this._height, Math.max(0, Math.floor(r))),
+            Math.min(this._width, Math.max(0, Math.floor(c))));
+    }
+
+    // rp,cm  rp,cp
+    // rm,cm  rm,cp
+    sample3Interp(r, c) {
+        // Bilinear interpolate
+        const rm = Math.floor(r);
+        const rp = Math.ceil(r);
+        const t = (r - rm);//(rp-rm should be 1)
+        const cm = Math.floor(c);
+        const cp = Math.ceil(c);
+        const u = (c - cm);//(cp-cm should be 1)
+
+        let lerpTp = glMatrix.vec3.create();
+        let lerpTm = glMatrix.vec3.create();
+        // vertical lerp left side
+        glMatrix.vec3.lerp(lerpTm, this.sample3(rm, cm), this.sample3(rp, cm), t);
+        // vertical lerp right side
+        glMatrix.vec3.lerp(lerpTp, this.sample3(rm, cp), this.sample3(rp, cp), t);
+        // horizontal lerp both
+        let lerpBoth = glMatrix.vec3.create();
+        glMatrix.vec3.lerp(lerpBoth, lerpTm, lerpTp, u);
+        return lerpBoth;
     }
 }
