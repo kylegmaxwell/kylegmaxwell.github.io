@@ -33,13 +33,16 @@ export default class Fluids {
         this._velocityCacheIndex = 0;
         this._velocity = this._velocityCache[this._velocityCacheIndex];
         // Color / density
-        this._color = Grid.makeCustomGrid(this._width, this._height, (x, y) => {
+        this._seedColor = Grid.makeCustomGrid(this._width, this._height, (x, y) => {
             let n = noise3(x, y, 0);
             n[0] = Math.abs(n[0]);
             n[1] = Math.abs(n[1]);
             n[2] = Math.abs(n[2]);
             return n;
         });
+        this._color = this._seedColor;
+        // TODO start out black and use seed color to add pops of color
+        // this._color = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         // Temporary buffer for advection operations
         this._swap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
     }

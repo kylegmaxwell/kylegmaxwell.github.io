@@ -38,6 +38,8 @@ function handleLoad() {
     playButton.addEventListener('click', playIter);
     clearButton.addEventListener('click', doClear);
     renderModeSelector.addEventListener("change", updateRenderMode);
+    // Play by default
+    playIter();
 }
 
 var inDrag = false;
@@ -73,12 +75,6 @@ function getValue(inputBox, defaultValue) {
     return value;
 }
 
-function updateIter() {
-    if (renderObj)
-        renderObj.iter = getValue(iterInput, DEFAULT_ITER);
-    iterInput.value = renderObj.iter;
-    render();
-}
 
 function updateRes() {
     gameCanvas.width = getValue(resInput, gameCanvas.width);
@@ -99,7 +95,7 @@ function step() {
     // Wait until enough time has elapsed to render no faster than FPS
     if (delta > 1 / FPS) {
         renderObj.advect(delta);
-        iterInput.value += delta;
+        elapsedTimeInput.value = renderObj._simulationTimeElapsed;
         render();
         lastRenderTime = currentTime;
     }
@@ -145,8 +141,7 @@ function resetGame() {
 
     var width = gameCanvas.width;
     var height = gameCanvas.height;
-    var iter = getValue(iterInput, DEFAULT_ITER);
-    renderObj = new Fluids(height, width, iter);
+    renderObj = new Fluids(height, width);
     doClear();
     render();
 }
