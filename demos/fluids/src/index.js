@@ -8,6 +8,8 @@ var ctx = null;
 var paintMode = false;
 // Rendering is throttled to this frame rate
 var FPS = 10;
+var renderRequest = null;
+var lastRenderTime = null;
 
 // Set up initial hook to start scripts after page loads
 document.addEventListener("DOMContentLoaded", handleLoad);
@@ -16,16 +18,6 @@ document.addEventListener("DOMContentLoaded", handleLoad);
  * Main function that runs onLoad for the page
  */
 function handleLoad() {
-    console.log("LOAD");
-    // var mode = localStorage.getItem('fractal.mode');
-    // if (mode != null) {
-    //     modeSelector.value = mode;
-    // }
-    // var width = localStorage.getItem('fractal.width');
-    // if (width != null) {
-    //     gameCanvas.width = width;
-    //     resInput.value = width;
-    // }
     gameCanvas.height = gameCanvas.width;
     ctx = gameCanvas.getContext('2d');
     resetGame();
@@ -87,6 +79,9 @@ function step() {
         return;
     }
     const currentTime = performance.now();
+    if (lastRenderTime == null) {
+        lastRenderTime = currentTime;
+    }
     // in milli seconds
     const dt = currentTime - lastRenderTime;
     // no more than 1, in seconds
@@ -94,15 +89,13 @@ function step() {
 
     // Wait until enough time has elapsed to render no faster than FPS
     if (delta > 1 / FPS) {
-        renderObj.advect(delta);
+        renderObj.step(delta);
         elapsedTimeInput.value = renderObj._simulationTimeElapsed;
         render();
         lastRenderTime = currentTime;
     }
 }
 
-var renderRequest = null;
-var lastRenderTime = performance.now();
 function renderLoop() {
     step();
     render();
@@ -161,6 +154,4 @@ function render() {
             renderObj.draw(ctx);
         }
     }
-    // localStorage.setItem('fractal.mode', parseInt(modeSelector.value));
-    // localStorage.setItem('fractal.width', gameCanvas.width);
 }

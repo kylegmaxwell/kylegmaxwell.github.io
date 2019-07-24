@@ -1,6 +1,6 @@
 'use strict';
 
-import { advect as doAdvect } from './advect.js'
+import { advect } from './advect.js'
 import Grid from './grid.js'
 import { noise3 } from './curl.js';
 import { noiseSpeed } from './constants.js';
@@ -40,15 +40,14 @@ export default class Fluids {
             n[2] = Math.abs(n[2]);
             return n;
         });
-        this._color = this._seedColor;
-        // TODO start out black and use seed color to add pops of color
-        // this._color = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._color = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._black = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         // Temporary buffer for advection operations
         this._swap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
     }
 
-    toIndex(r, c) {
-        return r * this._width + c;
+    toPixelIndex(r, c) {
+        return 4 * (r * this._width + c);
     }
 
     setRenderMode(mode) {
@@ -67,7 +66,7 @@ export default class Fluids {
         // Loop over each pixel
         for (let r = 0; r < this._height; r++) {
             for (let c = 0; c < this._width; c++) {
-                const index = 4 * this.toIndex(r, c);
+                const index = this.toPixelIndex(r, c);
                 const value = renderGrid.sample3(r, c);
                 pixels[index + 0] = toFixed(value[0]);
                 pixels[index + 1] = toFixed(value[1]);
@@ -93,15 +92,40 @@ export default class Fluids {
         this._velocity = this._velocityCache[velocityIndex];
     }
 
-    advect(dt) {
-        this._simulationTimeElapsed += dt;
-        this.updateVelocity();
+    updateColor() {
+        // Fade the previous colors
+        this._color.dampen(0.9);
+
+        // Copy a patch from the seed grid at an interesting location
+        const seconds = Math.floor(this._simulationTimeElapsed);
+        const boxWidth = Math.floor(0.1 * this._width);
+        const border = 10;
+        const boxOffset = Math.min(Math.min(border + Math.floor((seconds % 5) * 2 * boxWidth), this._width - border), this._height - border);
+        this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
+        const boxBorder = 5;
+        this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+    }
+
+    advectAndSwap(dt) {
         // advect color into swap using velocity
-        doAdvect(dt, this._width, this._height, this._color, this._swap, this._velocity);
+        advect(dt, this._width, this._height, this._color, this._swap, this._velocity);
+
         // swap pointers
         let tmp = this._color;
         this._color = this._swap;
         this._swap = tmp;
+    }
 
+    step(dt) {
+        this._simulationTimeElapsed += dt;
+
+        // get from grid
+        this.updateVelocity();
+
+        // Update color using velocity
+        this.advectAndSwap(dt);
+
+        // Add density
+        this.updateColor();
     }
 }

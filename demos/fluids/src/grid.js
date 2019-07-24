@@ -6,10 +6,6 @@ import * as glm from '../lib/gl-matrix.js'
 import { noise3, curl3 } from './curl.js'
 import { noiseFrequency } from './constants.js'
 
-function toIndexHelper(r, c, width) {
-    return r * width + c;
-}
-
 /**
  * Represents a 2d float32 buffer 
  * {int} width
@@ -24,7 +20,7 @@ export default class Grid {
 
         for (let r = 0; r < this._height; r++) {
             for (let c = 0; c < this._width; c++) {
-                const index = this._channels * this.toIndex(r, c, this._width);
+                const index = this.toIndex(r, c);
                 for (let channel = 0; channel < this._channels; channel++) {
                     this._dataArray[index + channel] = 0.0;
                 }
@@ -47,11 +43,21 @@ export default class Grid {
         return grid;
     }
 
+    eachIndex(operation) {
+        for (let r = 0; r < this.height(); r++) {
+            for (let c = 0; c < this.width(); c++) {
+                const index = this.toIndex(r, c);
+                for (let channel = 0; channel < this.channels(); channel++) {
+                    operation(index + channel);
+                }
+            }
+        }
+    }
     // @param valueFunction (row,column)->float3
     setCustomValues(valueFunction) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
-                const index = this.channels() * this.toIndex(r, c, this.width);
+                const index = this.toIndex(r, c);
                 const frequency = noiseFrequency();
                 const sampleX = frequency * c;
                 const sampleY = frequency * r;
@@ -76,11 +82,36 @@ export default class Grid {
     }
 
     toIndex(r, c) {
-        return toIndexHelper(r, c, this._width);
+        return this._channels * ((r * this._width) + c);
     }
 
+    // Copy a rectangular region from other grid into this one
+    copySubGrid(sourceGrid, startRow, startColumn, width, height) {
+        const endRow = startRow + height;
+        const endColumn = startColumn + width;
+        if (startRow < 0 || startColumn < 0 || endRow >= this._height || endColumn >= this._width) {
+            throw new Error("Grid index out of bounds");
+        }
+        for (let r = startRow; r < endRow; r++) {
+            for (let c = startColumn; c < endColumn; c++) {
+                const index = this.toIndex(r, c);
+                for (let channel = 0; channel < this._channels; channel++) {
+                    this._dataArray[index + channel] = sourceGrid._dataArray[index + channel];
+                }
+            }
+        }
+    }
+
+    // Dampen by an exponential factor
+    // TODO this should use an exponential decay function to be time step aware
+    dampen(factor) {
+        // let self = index;
+        this.eachIndex((index) => {
+            this._dataArray[index] = factor * this._dataArray[index];
+        });
+    }
     set3(r, c, value) {
-        let index = this._channels * toIndexHelper(r, c, this._width);
+        let index = this.toIndex(r, c);
         this._dataArray[index + 0] = value[0];
         this._dataArray[index + 1] = value[1];
         this._dataArray[index + 2] = value[2];
@@ -88,7 +119,7 @@ export default class Grid {
 
     sample3(r, c) {
         // return sample3Helper(r, c, this._width, this._dataArray);
-        let index = this._channels * toIndexHelper(r, c, this._width);
+        let index = this.toIndex(r, c);
         let value = glMatrix.vec3.create();
         if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
             // Empty boundary condition
