@@ -5,10 +5,15 @@ export function differenceFraction() {
 
 // Ratio of noise frequency to curl noise delta
 export function noiseFrequency() {
-    return 0.02;
+    return 0.04;
 }
 
 // Multiplier on advection speed
 export function advectionScale() {
-    return 2.0;
+    return 4.0;
+}
+
+// Rate of noise evolution
+export function noiseSpeed() {
+    return 0.1;
 }

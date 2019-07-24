@@ -28,12 +28,12 @@
         <section>
             <label>Resolution<input id="resInput" type="text" class="text" value="300"
                     onblur="updateRes()" /></label><br><label>Iterations<input id="iterInput" type="text" class="text"
-                    value="20" onblur="updateIter()" /></label><br>
+                    value="20" /></label><br>
             <label>Render mode
-                <select id="modeSelector" onchange="resetGame()">
-                    <option value="0">Density</option>
-                    <option value="1">Velocity</option>
-                    <option value="2">Vorticity</option>
+                <select id="renderModeSelector">
+                    <option value="density">Density</option>
+                    <option value="velocity">Velocity</option>
+                    <option value="vorticity">Vorticity</option>
                 </select></label><br>
             <button type="button" id="incButton">Increment</button>
             <button type="button" id="playButton">Play</button>

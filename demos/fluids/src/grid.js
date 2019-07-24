@@ -3,7 +3,7 @@
 // Note gl-matrix creates a global object glMatrix
 import * as glm from '../lib/gl-matrix.js'
 
-import { noise3d, curl2d } from './curl.js'
+import { noise3, curl3 } from './curl.js'
 import { noiseFrequency } from './constants.js'
 
 function toIndexHelper(r, c, width) {
@@ -32,12 +32,12 @@ export default class Grid {
         }
     }
 
-    static makeCurlGrid(width, height) {
-        return this.makeCustomGrid(width, height, curl2d);
+    static makeCurlGrid(width, height, z) {
+        return this.makeCustomGrid(width, height, (x, y) => { return curl3(x, y, z); });
     }
 
-    static makeNoiseGrid(width, height) {
-        return this.makeCustomGrid(width, height, noise3d);
+    static makeNoiseGrid(width, height, z) {
+        return this.makeCustomGrid(width, height, (x, y) => { return noise3(x, y, z); });
     }
 
     // @param valueFunction (row,column)->float3

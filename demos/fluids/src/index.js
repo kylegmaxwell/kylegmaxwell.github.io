@@ -37,6 +37,7 @@ function handleLoad() {
     stopButton.addEventListener('click', stopIter);
     playButton.addEventListener('click', playIter);
     clearButton.addEventListener('click', doClear);
+    renderModeSelector.addEventListener("change", updateRenderMode);
 }
 
 var inDrag = false;
@@ -134,32 +135,17 @@ function doClear() {
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 }
 
+function updateRenderMode() {
+    renderObj.setRenderMode(renderModeSelector.value);
+    render();
+}
+
 function resetGame() {
     paintMode = !!paintCheck.checked;
 
     var width = gameCanvas.width;
     var height = gameCanvas.height;
     var iter = getValue(iterInput, DEFAULT_ITER);
-    /*
-    More ideas
-        1. Interpolate particles between fixed steps
-        2. loft curves along interpolated points with increasing z
-        3. Color by delta position, relative to previous frame, or start position
-    */
-    // switch(parseInt(modeSelector.value)) {
-    //     case 0: // Mandelbrot
-    //         renderObj = new Mandelbrot(height, width, iter, paintMode);
-    //         break;
-    //     case 1: // Buddhabrot
-    //         renderObj = new Buddhabrot(height, width, iter, paintMode);
-    //         break;
-    //     case 2: // Partibrot
-    //         renderObj = new Partibrot(height, width, iter, paintMode);
-    //         break;
-    //     case 3: // Linebrot
-    //         renderObj = new Linebrot(height, width, iter, paintMode);
-    //         break;
-    // }
     renderObj = new Fluids(height, width, iter);
     doClear();
     render();
