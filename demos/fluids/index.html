@@ -35,6 +35,11 @@
                     <option value="velocity">Velocity</option>
                     <option value="vorticity">Vorticity</option>
                 </select></label><br>
+            <label>Velocity mode
+                <select id="velocityModeSelector">
+                    <option value="advect">Advect</option>
+                    <option value="noise">Noise</option>
+                </select></label><br>
             <button type="button" id="incButton">Increment</button>
             <button type="button" id="playButton">Play</button>
             <button type=" button" id="stopButton">Stop</button>
@@ -50,7 +55,7 @@
     <script src="lib/gl-matrix.js"></script>
     <script src="lib/perlin.js" type="module"></script>
 
-    <script src="src/advect.js" type="module"></script>
+    <script src="src/solve.js" type="module"></script>
     <script src="src/constants.js" type="module"></script>
     <script src="src/curl.js" type="module"></script>
     <script src="src/fluids.js" type="module"></script>

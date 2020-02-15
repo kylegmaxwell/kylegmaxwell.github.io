@@ -30,6 +30,7 @@ function handleLoad() {
     playButton.addEventListener('click', playIter);
     clearButton.addEventListener('click', doClear);
     renderModeSelector.addEventListener("change", updateRenderMode);
+    velocityModeSelector.addEventListener("change", updateVelocityMode);
     // Play by default
     playIter();
 }
@@ -126,6 +127,11 @@ function doClear() {
 
 function updateRenderMode() {
     renderObj.setRenderMode(renderModeSelector.value);
+    render();
+}
+
+function updateVelocityMode() {
+    renderObj.setVelocityMode(velocityModeSelector.value);
     render();
 }
 

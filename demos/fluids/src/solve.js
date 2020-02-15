@@ -14,14 +14,4 @@ export function advect(dt, width, height, source, destination, velocities) {
             destination.set3(r, c, sample);
         }
     }
-    // vec2 pos = vec2(0, 0);
-    // vec4 vNew = input2Sample(pos.x, pos.y);
-    // pos -= vec2(vNew.x * uAdvectionScale.x, vNew.y * uAdvectionScale.y);
-    // vNew = input2Sample(pos.x, pos.y);
-
-
-    // vec4 sample = input1Sample(pos.x, pos.y);
-
-    // gl_FragColor = sample;
 }
-//.... Density?

@@ -1,6 +1,6 @@
 'use strict';
 
-import { advect } from './advect.js'
+import { advect } from './solve.js'
 import Grid from './grid.js'
 import { noise3 } from './curl.js';
 import { noiseSpeed } from './constants.js';
@@ -25,6 +25,7 @@ export default class Fluids {
         this._width = width;
         this._simulationTimeElapsed = 0.0;
         this._renderMode = "density";
+        this._velocityMode = "advect";
         // Fluid velocity
         this._velocityCache = [];
         for (let i = 0; i < 10; i++) {
@@ -43,7 +44,8 @@ export default class Fluids {
         this._color = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         this._black = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         // Temporary buffer for advection operations
-        this._swap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._colorSwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
     }
 
     toPixelIndex(r, c) {
@@ -52,6 +54,10 @@ export default class Fluids {
 
     setRenderMode(mode) {
         this._renderMode = mode;
+    }
+
+    setVelocityMode(mode) {
+        this._velocityMode = mode;
     }
 
     /**
@@ -76,20 +82,30 @@ export default class Fluids {
         }
     }
 
-    updateVelocity() {
+    updateVelocity(dt) {
 
         // Sampling noise every frame was too slow on CPU
         // this._velocity = Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * this._simulationTimeElapsed);
 
-        // This index oscillates between 0 and 9
-        this._velocityCacheIndex += 1;
-        this._velocityCacheIndex %= 20;
-        const velocityIndex = this._velocityCacheIndex >= 10
-            ? 19 - this._velocityCacheIndex
-            : this._velocityCacheIndex;
+        if (this._velocityMode === "noise") {
+            // This index oscillates between 0 and 9
+            this._velocityCacheIndex += 1;
+            this._velocityCacheIndex %= 20;
+            const velocityIndex = this._velocityCacheIndex >= 10
+                ? 19 - this._velocityCacheIndex
+                : this._velocityCacheIndex;
 
-        // Look up the velocity from the cached array
-        this._velocity = this._velocityCache[velocityIndex];
+            // Look up the velocity from the cached array
+            this._velocity = this._velocityCache[velocityIndex];
+        } else if (this._velocityMode === "advect") {
+            this.advectAndSwapVelocity(dt);
+            //TODO
+            // diffuse
+            // advect
+            // project
+            // vorticity confinement
+
+        }
     }
 
     updateColor() {
@@ -106,24 +122,34 @@ export default class Fluids {
         this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
     }
 
-    advectAndSwap(dt) {
+    advectAndSwapColor(dt) {
         // advect color into swap using velocity
-        advect(dt, this._width, this._height, this._color, this._swap, this._velocity);
+        advect(dt, this._width, this._height, this._color, this._colorSwap, this._velocity);
 
         // swap pointers
         let tmp = this._color;
-        this._color = this._swap;
-        this._swap = tmp;
+        this._color = this._colorSwap;
+        this._colorSwap = tmp;
+    }
+
+    advectAndSwapVelocity(dt) {
+        // advect color into swap using velocity
+        advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
+
+        // swap pointers
+        let tmp = this._velocity;
+        this._velocity = this._velocitySwap;
+        this._velocitySwap = tmp;
     }
 
     step(dt) {
         this._simulationTimeElapsed += dt;
 
         // get from grid
-        this.updateVelocity();
+        this.updateVelocity(dt);
 
         // Update color using velocity
-        this.advectAndSwap(dt);
+        this.advectAndSwapColor(dt);
 
         // Add density
         this.updateColor();
