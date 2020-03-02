@@ -12,10 +12,12 @@ import { noiseFrequency } from './constants.js'
  * {int} height
  */
 export default class Grid {
-    constructor(width, height) {
+    constructor(width, height, channels) {
         this._width = width;
         this._height = height;
-        this._channels = 3;
+        if (channels == null) {
+            this._channels = 3;
+        }
         this._dataArray = new Float32Array(this._channels * this._height * this._width);
 
         for (let r = 0; r < this._height; r++) {
@@ -43,6 +45,16 @@ export default class Grid {
         return grid;
     }
 
+    static makeUniformGrid1Channel(width, height, value) {
+        const channels = 1;
+        let grid = new Grid(width, height, channels);
+        grid.eachIndex((r, c) => {
+            const index = this.toIndex(r, c);
+            this._dataArray[index] = value;
+        });
+        return grid;
+    }
+
     eachIndex(operation) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
@@ -53,6 +65,7 @@ export default class Grid {
             }
         }
     }
+
     // @param valueFunction (row,column)->float3
     setCustomValues(valueFunction) {
         for (let r = 0; r < this.height(); r++) {
@@ -110,6 +123,12 @@ export default class Grid {
             this._dataArray[index] = factor * this._dataArray[index];
         });
     }
+
+    set1(r, c, value) {
+        let index = this.toIndex(r, c);
+        this._dataArray[index] = value[0];
+    }
+
     set3(r, c, value) {
         let index = this.toIndex(r, c);
         this._dataArray[index + 0] = value[0];

@@ -1,6 +1,6 @@
 'use strict';
 
-import { advect } from './solve.js'
+import { advect, project } from './solve.js'
 import Grid from './grid.js'
 import { noise3 } from './curl.js';
 import { noiseSpeed } from './constants.js';
@@ -46,6 +46,8 @@ export default class Fluids {
         // Temporary buffer for advection operations
         this._colorSwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._divergence = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._density = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
     }
 
     toPixelIndex(r, c) {
@@ -98,7 +100,11 @@ export default class Fluids {
             // Look up the velocity from the cached array
             this._velocity = this._velocityCache[velocityIndex];
         } else if (this._velocityMode === "advect") {
-            this.advectAndSwapVelocity(dt);
+            this.advectVelocity(dt);
+            this.swapVelocity(dt);
+
+            this.projectVelocity(dt);
+            this.swapVelocity(dt);
             //TODO
             // diffuse
             // advect
@@ -132,14 +138,26 @@ export default class Fluids {
         this._colorSwap = tmp;
     }
 
-    advectAndSwapVelocity(dt) {
-        // advect color into swap using velocity
-        advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
-
+    swapVelocity(dt) {
         // swap pointers
         let tmp = this._velocity;
         this._velocity = this._velocitySwap;
         this._velocitySwap = tmp;
+    }
+
+    advectVelocity(dt) {
+        // advect color into swap using velocity
+        advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
+    }
+
+    advectVelocity(dt) {
+        // advect color into swap using velocity
+        advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
+    }
+
+    projectVelocity(dt) {
+        // advect color into swap using velocity
+        project(dt, this._width, this._height, this._velocity, this._velocitySwap, this._color, this._colorSwap, this._divergence, this._density);
     }
 
     step(dt) {

@@ -18,9 +18,7 @@ document.addEventListener("DOMContentLoaded", handleLoad);
  * Main function that runs onLoad for the page
  */
 function handleLoad() {
-    gameCanvas.height = gameCanvas.width;
-    ctx = gameCanvas.getContext('2d');
-    resetGame();
+    updateRes();
     render();
     gameCanvas.addEventListener('mousedown', handleMouse, false);
     gameCanvas.addEventListener('mousemove', handleMouse, false);
@@ -141,6 +139,8 @@ function resetGame() {
     var width = gameCanvas.width;
     var height = gameCanvas.height;
     renderObj = new Fluids(height, width);
+    ctx = gameCanvas.getContext('2d');
+
     doClear();
     render();
 }
