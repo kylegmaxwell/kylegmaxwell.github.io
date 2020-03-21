@@ -32,7 +32,8 @@ export default class Fluids {
             this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * i));
         }
         this._velocityCacheIndex = 0;
-        this._velocity = this._velocityCache[this._velocityCacheIndex];
+        this._velocity = this._velocityCache[this._velocityCacheIndex];// TODO: Should this be deep copy?
+        // this._velocity = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         // Color / density
         this._seedColor = Grid.makeCustomGrid(this._width, this._height, (x, y) => {
             let n = noise3(x, y, 0);
@@ -41,13 +42,20 @@ export default class Fluids {
             n[2] = Math.abs(n[2]);
             return n;
         });
+        this._seedVelocity = Grid.makeCustomGrid(this._width, this._height, (x, y) => {
+            let v = glMatrix.vec3.create();
+            v[0] = 1;
+            v[1] = 0;
+            v[2] = 0;
+            return v;
+        });
         this._color = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         this._black = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         // Temporary buffer for advection operations
         this._colorSwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
         this._divergence = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
-        this._density = Grid.makeCustomGrid(this._width, this._height, () => { return glMatrix.vec3.create(); });
+        this._density = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
     }
 
     toPixelIndex(r, c) {
@@ -100,11 +108,14 @@ export default class Fluids {
             // Look up the velocity from the cached array
             this._velocity = this._velocityCache[velocityIndex];
         } else if (this._velocityMode === "advect") {
+            this.addVelocity(dt);
+
             this.advectVelocity(dt);
             this.swapVelocity(dt);
 
-            this.projectVelocity(dt);
-            this.swapVelocity(dt);
+            // this.projectVelocity(dt);
+            // this.swapVelocity(dt);
+
             //TODO
             // diffuse
             // advect
@@ -114,15 +125,24 @@ export default class Fluids {
         }
     }
 
+    getBoxWidth() {
+        return Math.floor(0.1 * this._width);
+    }
+
+    getBoxOffset() {
+        const border = 10;
+        const boxWidth = this.getBoxWidth();
+        const seconds = Math.floor(this._simulationTimeElapsed);
+        return Math.min(Math.min(border + Math.floor((seconds % 5) * 2 * boxWidth), this._width - border), this._height - border);
+    }
+
     updateColor() {
         // Fade the previous colors
         this._color.dampen(0.9);
 
         // Copy a patch from the seed grid at an interesting location
-        const seconds = Math.floor(this._simulationTimeElapsed);
-        const boxWidth = Math.floor(0.1 * this._width);
-        const border = 10;
-        const boxOffset = Math.min(Math.min(border + Math.floor((seconds % 5) * 2 * boxWidth), this._width - border), this._height - border);
+        const boxWidth = this.getBoxWidth();
+        const boxOffset = this.getBoxOffset();
         this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
         const boxBorder = 5;
         this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
@@ -145,9 +165,11 @@ export default class Fluids {
         this._velocitySwap = tmp;
     }
 
-    advectVelocity(dt) {
-        // advect color into swap using velocity
-        advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
+    addVelocity(dt) {
+
+        const boxWidth = this.getBoxWidth();
+        const boxOffset = this.getBoxOffset();
+        this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
     }
 
     advectVelocity(dt) {
@@ -157,7 +179,7 @@ export default class Fluids {
 
     projectVelocity(dt) {
         // advect color into swap using velocity
-        project(dt, this._width, this._height, this._velocity, this._velocitySwap, this._color, this._colorSwap, this._divergence, this._density);
+        project(dt, this._width, this._height, this._velocity, this._velocitySwap, this._divergence, this._density);
     }
 
     step(dt) {

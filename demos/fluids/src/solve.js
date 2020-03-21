@@ -6,25 +6,17 @@ import { advectionScale } from './constants.js'
 // Advect colors by velocity to get movement
 // Both colors and velocities must be 3 components
 export function advect(dt, width, height, source, destination, velocities) {
-    const scale = advectionScale();
+    const scale = advectionScale() * dt;
     for (let r = 0; r < height; r++) {
         for (let c = 0; c < width; c++) {
-            const velocity = velocities.sample3(r, c);
-            const sample = source.sample3Interp(r - velocity[0] * scale, c - velocity[1] * scale);
-            destination.set3(r, c, sample);
+            const velocity = velocities.sample3(c, r);
+            const sample = source.sample3Interp(c - velocity[1] * scale, r - velocity[0] * scale);
+            destination.set3(c, r, sample);
         }
     }
 }
 
-export function project(dt, width, height, inVelocity, outVelocity, inColor, outColor, ioDivergence, ioDensity) {
-    // const scale = advectionScale();
-    // for (let r = 0; r < height; r++) {
-    //     for (let c = 0; c < width; c++) {
-    //         const velocity = velocities.sample3(r, c);
-    //         const sample = source.sample3Interp(r - velocity[0] * scale, c - velocity[1] * scale);
-    //         destination.set3(r, c, sample);
-    //     }
-    // }
+export function project(dt, width, height, inVelocity, outVelocity, ioDivergence, ioPressure) {
 
     // Init buffers
     for (let r = 0; r < height; r++) {
@@ -35,64 +27,43 @@ export function project(dt, width, height, inVelocity, outVelocity, inColor, out
             const vym = inVelocity.sample3(r, c - 1);
             const curl = -0.5 * (vxp[0] - vxm[0] + vyp[1] - vym[1]);
             ioDivergence.set1(r, c, curl);
-            ioDensity.set1(r, c, 0.0);
+            ioPressure.set1(r, c, 0.0);
         }
     }
 
-    //diffuse the divergence?
-    // const NUM_ITERATIONS = 20;
-    // for (let i = 0; i < NUM_ITERATIONS; i++) {
-    //     for (let r = 0; r < height; r++) {
-    //         for (let c = 0; c < width; c++) {
+    // diffuse the divergence or pressure?
+    const NUM_ITERATIONS = 20;
+    for (let i = 0; i < NUM_ITERATIONS; i++) {
+        for (let r = 0; r < height; r++) {
+            for (let c = 0; c < width; c++) {
 
-    //             const s = r;
-    //             const t = c;
+                let cellDensity = ioDivergence.sample1(r, c);
 
-    //             let cellDensity = ioDivergence.sample1(s, t);
+                cellDensity += ioPressure.sample1(r - 1, c);
+                cellDensity += ioPressure.sample1(r + 1, c);
+                cellDensity += ioPressure.sample1(r, c - 1);
+                cellDensity += ioPressure.sample1(r, c + 1);
+                cellDensity *= 0.25; // average? TODO 
+                ioPressure.set1(r, c, cellDensity);
+            }
+        }
+    }
 
-    //             s = r - 1, t = c;
-    //             fix(s, t);//bound indicies into array
-    //             cellDensity += ioDensity[s][t];
+    for (let r = 0; r < height; r++) {
+        for (let c = 0; c < width; c++) {
 
-    //             s = r + 1, t = c;
-    //             fix(s, t);//bound indicies into array
-    //             cellDensity += ioDensity[s][t];
+            //copy to next matrix w/o divergance
+            let vel = inVelocity.sample3(r, c);
 
-    //             s = r, t = c - 1;
-    //             fix(s, t);//bound indicies into array
-    //             cellDensity += ioDensity[s][t];
+            let outVel = glMatrix.vec3.create();
 
-    //             s = r, t = c + 1;
-    //             fix(s, t);//bound indicies into array
-    //             cellDensity += ioDensity[s][t];
+            outVel.x = vel.x - 0.5 *
+                (ioPressure.sample1(r + 1, c) - ioPressure.sample1(r - 1, c));
 
-    //             cellDensity /= 4;
-    //             ioDensity.set3(r, c, cellDensity);
-    //         }
-    //     }
-    //     set_boundary();
-    // }
+            outVel.y = vel.y - 0.5 *
+                (ioPressure.sample1(r, c + 1) - ioPressure.sample1(r, c - 1));
 
-    // for (int r = 0; r < SYSTEM_SIZE; r++)
-    // {
-    //     for (int c = 0; c < SYSTEM_SIZE; c++)
-    //     {
-    //         int w = r + 1, x = c, y = r - 1, z = c;
-    //         fix(w, x);
-    //         fix(y, z);
-
-    //         int ww = r, xx = c + 1, yy = r, zz = c - 1;
-    //         fix(ww, xx);
-    //         fix(yy, zz);
-
-    //         //copy to next matrix w/o divergance
-    //         nex(r, c) -> vel=vec3(cur(r, c) -> vel.x - 0.5 * (ioDensity[w][x] - ioDensity[y][z]),
-    //             cur(r, c) -> vel.y - 0.5 * (ioDensity[ww][xx] - ioDensity[yy][zz]), 0);
-    //         //preserve density
-    //         nex(r, c) -> p=(cur(r, c) -> p);
-    //         nex(r, c) -> t=(cur(r, c) -> t);
-    //     }
-    // }
-    // set_boundary();
-
+            outVelocity.set3(r, c, outVel);
+        }
+    }
 }

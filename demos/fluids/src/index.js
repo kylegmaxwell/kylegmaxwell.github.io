@@ -27,8 +27,24 @@ function handleLoad() {
     stopButton.addEventListener('click', stopIter);
     playButton.addEventListener('click', playIter);
     clearButton.addEventListener('click', doClear);
-    renderModeSelector.addEventListener("change", updateRenderMode);
-    velocityModeSelector.addEventListener("change", updateVelocityMode);
+
+    {
+        let mode = localStorage.getItem('fluids.rendermode');
+        if (mode != null) {
+            renderModeSelector.value = mode;
+            updateRenderMode();
+        }
+        renderModeSelector.addEventListener("change", updateRenderMode);
+    }
+    {
+        let mode = localStorage.getItem('fluids.velocitymode');
+        if (mode != null) {
+            velocityModeSelector.value = mode;
+            updateVelocityMode();
+        }
+        velocityModeSelector.addEventListener("change", updateVelocityMode);
+    }
+
     // Play by default
     playIter();
 }
@@ -120,28 +136,32 @@ function incIter() {
 }
 
 function doClear() {
+    localStorage.clear();
+    resetGame();
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    render();
 }
 
 function updateRenderMode() {
     renderObj.setRenderMode(renderModeSelector.value);
+    localStorage.setItem('fluids.rendermode', renderModeSelector.value);
     render();
 }
 
 function updateVelocityMode() {
     renderObj.setVelocityMode(velocityModeSelector.value);
+    localStorage.setItem('fluids.velocitymode', velocityModeSelector.value);
     render();
 }
 
 function resetGame() {
+    lastRenderTime = null;
     paintMode = !!paintCheck.checked;
-
     var width = gameCanvas.width;
     var height = gameCanvas.height;
     renderObj = new Fluids(height, width);
     ctx = gameCanvas.getContext('2d');
-
-    doClear();
+    incIter();
     render();
 }
 

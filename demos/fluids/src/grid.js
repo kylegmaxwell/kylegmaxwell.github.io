@@ -17,6 +17,8 @@ export default class Grid {
         this._height = height;
         if (channels == null) {
             this._channels = 3;
+        } else {
+            this._channels = channels;
         }
         this._dataArray = new Float32Array(this._channels * this._height * this._width);
 
@@ -49,8 +51,8 @@ export default class Grid {
         const channels = 1;
         let grid = new Grid(width, height, channels);
         grid.eachIndex((r, c) => {
-            const index = this.toIndex(r, c);
-            this._dataArray[index] = value;
+            const index = grid.toIndex(r, c);
+            grid._dataArray[index] = value;
         });
         return grid;
     }
@@ -125,18 +127,41 @@ export default class Grid {
     }
 
     set1(r, c, value) {
+        if (!this._channels == 1) {
+            throw "Wrong sample function";
+        }
         let index = this.toIndex(r, c);
         this._dataArray[index] = value[0];
     }
 
     set3(r, c, value) {
+        if (!this._channels == 3) {
+            throw "Wrong sample function";
+        }
         let index = this.toIndex(r, c);
         this._dataArray[index + 0] = value[0];
         this._dataArray[index + 1] = value[1];
         this._dataArray[index + 2] = value[2];
     }
 
+    sample1(r, c) {
+        if (!this._channels == 1) {
+            throw "Wrong sample function";
+        }
+        let index = this.toIndex(r, c);
+        let value = 0.0;
+        if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
+            // Empty boundary condition
+            return value;
+        }
+        value = this._dataArray[index]
+        return value;
+    }
+
     sample3(r, c) {
+        if (!this._channels == 3) {
+            throw "Wrong sample function";
+        }
         // return sample3Helper(r, c, this._width, this._dataArray);
         let index = this.toIndex(r, c);
         let value = glMatrix.vec3.create();
