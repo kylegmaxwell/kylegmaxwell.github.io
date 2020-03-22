@@ -3,13 +3,16 @@
 import Fluids from './fluids.js'
 
 var DEFAULT_ITER = 20;
-var renderObj = null;
+var fluidsInstance = null;
 var ctx = null;
 var paintMode = false;
 // Rendering is throttled to this frame rate
 var FPS = 10;
 var renderRequest = null;
 var lastRenderTime = null;
+
+// Ratio of canvas size / simulation grid size 
+var displayScale = 4.0;
 
 // Set up initial hook to start scripts after page loads
 document.addEventListener("DOMContentLoaded", handleLoad);
@@ -90,7 +93,7 @@ function updateRes() {
 }
 
 function step() {
-    if (!renderObj) {
+    if (!fluidsInstance) {
         return;
     }
     const currentTime = performance.now();
@@ -104,8 +107,8 @@ function step() {
 
     // Wait until enough time has elapsed to render no faster than FPS
     if (delta > 1 / FPS) {
-        renderObj.step(delta);
-        elapsedTimeInput.value = renderObj._simulationTimeElapsed;
+        fluidsInstance.step(delta);
+        elapsedTimeInput.value = fluidsInstance._simulationTimeElapsed;
         render();
         lastRenderTime = currentTime;
     }
@@ -143,13 +146,13 @@ function doClear() {
 }
 
 function updateRenderMode() {
-    renderObj.setRenderMode(renderModeSelector.value);
+    fluidsInstance.setRenderMode(renderModeSelector.value);
     localStorage.setItem('fluids.rendermode', renderModeSelector.value);
     render();
 }
 
 function updateVelocityMode() {
-    renderObj.setVelocityMode(velocityModeSelector.value);
+    fluidsInstance.setVelocityMode(velocityModeSelector.value);
     localStorage.setItem('fluids.velocitymode', velocityModeSelector.value);
     render();
 }
@@ -157,9 +160,9 @@ function updateVelocityMode() {
 function resetGame() {
     lastRenderTime = null;
     paintMode = !!paintCheck.checked;
-    var width = gameCanvas.width;
-    var height = gameCanvas.height;
-    renderObj = new Fluids(height, width);
+    const width = gameCanvas.width / displayScale;
+    const height = gameCanvas.height / displayScale;
+    fluidsInstance = new Fluids(height, width);
     ctx = gameCanvas.getContext('2d');
     incIter();
     render();
@@ -172,12 +175,8 @@ function render() {
     var imageData = ctx.getImageData(0, 0, width, height);
     var data = imageData.data;
 
-    if (renderObj) {
-        if (renderObj.render) {
-            renderObj.render(data);
-            ctx.putImageData(imageData, 0, 0);
-        } else {
-            renderObj.draw(ctx);
-        }
+    if (fluidsInstance) {
+        fluidsInstance.render(data, displayScale);
+        ctx.putImageData(imageData, 0, 0);
     }
 }

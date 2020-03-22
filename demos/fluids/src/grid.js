@@ -3,7 +3,7 @@
 // Note gl-matrix creates a global object glMatrix
 import * as glm from '../lib/gl-matrix.js'
 
-import { noise3, curl3 } from './curl.js'
+import { noise1, curl2 } from './curl.js'
 import { noiseFrequency } from './constants.js'
 
 /**
@@ -16,7 +16,7 @@ export default class Grid {
         this._width = width;
         this._height = height;
         if (channels == null) {
-            this._channels = 3;
+            this._channels = 2;
         } else {
             this._channels = channels;
         }
@@ -33,16 +33,16 @@ export default class Grid {
     }
 
     static makeCurlGrid(width, height, z) {
-        return this.makeCustomGrid(width, height, (x, y) => { return curl3(x, y, z); });
+        return this.makeCustomGrid(width, height, 2, (x, y) => { return curl2(x, y, z); });
     }
 
     static makeNoiseGrid(width, height, z) {
-        return this.makeCustomGrid(width, height, (x, y) => { return noise3(x, y, z); });
+        return this.makeCustomGrid(width, height, (x, y) => { return [noise1(x, y, z)]; });
     }
 
-    // @param valueFunction (row,column)->float3
-    static makeCustomGrid(width, height, valueFunction) {
-        let grid = new Grid(width, height);
+    // @param valueFunction (row,column)->float(s)
+    static makeCustomGrid(width, height, channels, valueFunction) {
+        let grid = new Grid(width, height, channels);
         grid.setCustomValues(valueFunction);
         return grid;
     }
@@ -68,7 +68,7 @@ export default class Grid {
         }
     }
 
-    // @param valueFunction (row,column)->float3
+    // @param valueFunction (row,column)->float(s)
     setCustomValues(valueFunction) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
@@ -77,8 +77,7 @@ export default class Grid {
                 const sampleX = frequency * c;
                 const sampleY = frequency * r;
                 const vecValue = valueFunction(sampleX, sampleY);
-                const vectorSize = 3;
-                for (let channel = 0; channel < this.channels() && channel < vectorSize; channel++) {
+                for (let channel = 0; channel < this.channels(); channel++) {
                     this._dataArray[index + channel] = vecValue[channel];
                 }
             }
@@ -127,25 +126,24 @@ export default class Grid {
     }
 
     set1(r, c, value) {
-        if (!this._channels == 1) {
+        if (this._channels !== 1) {
             throw "Wrong sample function";
         }
         let index = this.toIndex(r, c);
-        this._dataArray[index] = value[0];
+        this._dataArray[index] = value;
     }
 
-    set3(r, c, value) {
-        if (!this._channels == 3) {
+    set2(r, c, value) {
+        if (this._channels !== 2) {
             throw "Wrong sample function";
         }
         let index = this.toIndex(r, c);
         this._dataArray[index + 0] = value[0];
         this._dataArray[index + 1] = value[1];
-        this._dataArray[index + 2] = value[2];
     }
 
     sample1(r, c) {
-        if (!this._channels == 1) {
+        if (this._channels !== 1) {
             throw "Wrong sample function";
         }
         let index = this.toIndex(r, c);
@@ -158,13 +156,32 @@ export default class Grid {
         return value;
     }
 
-    sample3(r, c) {
-        if (!this._channels == 3) {
+    sample1Interp(r, c) {
+        // Bilinear interpolate
+        const rm = Math.floor(r);
+        const rp = Math.ceil(r);
+        const t = (r - rm);//(rp-rm should be 1)
+        const tm = 1.0 - t;
+        const cm = Math.floor(c);
+        const cp = Math.ceil(c);
+        const u = (c - cm);//(cp-cm should be 1)
+        const um = 1.0 - u;
+
+        // vertical lerp left side
+        let lerpTm = tm * this.sample1(rm, cm) + t * this.sample1(rp, cm);
+        // vertical lerp right side
+        let lerpTp = tm * this.sample1(rm, cp) + t * this.sample1(rp, cp);
+        // horizontal lerp both
+        let lerpBoth = um * lerpTm + u * lerpTp;
+        return lerpBoth;
+    }
+
+    sample2(r, c) {
+        if (this._channels !== 2) {
             throw "Wrong sample function";
         }
-        // return sample3Helper(r, c, this._width, this._dataArray);
         let index = this.toIndex(r, c);
-        let value = glMatrix.vec3.create();
+        let value = glMatrix.vec2.create();
         if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
             // Empty boundary condition
             return value;
@@ -176,15 +193,15 @@ export default class Grid {
     }
 
 
-    sample3Nearest(r, c) {
-        return this.sample3(
+    sample2Nearest(r, c) {
+        return this.sample2(
             Math.min(this._height, Math.max(0, Math.floor(r))),
             Math.min(this._width, Math.max(0, Math.floor(c))));
     }
 
     // rp,cm  rp,cp
     // rm,cm  rm,cp
-    sample3Interp(r, c) {
+    sample2Interp(r, c) {
         // Bilinear interpolate
         const rm = Math.floor(r);
         const rp = Math.ceil(r);
@@ -193,15 +210,15 @@ export default class Grid {
         const cp = Math.ceil(c);
         const u = (c - cm);//(cp-cm should be 1)
 
-        let lerpTp = glMatrix.vec3.create();
-        let lerpTm = glMatrix.vec3.create();
         // vertical lerp left side
-        glMatrix.vec3.lerp(lerpTm, this.sample3(rm, cm), this.sample3(rp, cm), t);
+        let lerpTm = glMatrix.vec2.create();
+        glMatrix.vec2.lerp(lerpTm, this.sample2(rm, cm), this.sample2(rp, cm), t);
         // vertical lerp right side
-        glMatrix.vec3.lerp(lerpTp, this.sample3(rm, cp), this.sample3(rp, cp), t);
+        let lerpTp = glMatrix.vec2.create();
+        glMatrix.vec2.lerp(lerpTp, this.sample2(rm, cp), this.sample2(rp, cp), t);
         // horizontal lerp both
-        let lerpBoth = glMatrix.vec3.create();
-        glMatrix.vec3.lerp(lerpBoth, lerpTm, lerpTp, u);
+        let lerpBoth = glMatrix.vec2.create();
+        glMatrix.vec2.lerp(lerpBoth, lerpTm, lerpTp, u);
         return lerpBoth;
     }
 }
