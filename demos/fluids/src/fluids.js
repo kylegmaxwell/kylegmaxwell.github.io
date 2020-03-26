@@ -51,7 +51,7 @@ export default class Fluids {
         this._colorSwap = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
         this._divergence = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
-        this._density = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._pressure = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
     }
 
     toDisplayPixelIndex(r, c, displayScale) {
@@ -100,9 +100,6 @@ export default class Fluids {
 
     updateVelocity(dt) {
 
-        // Sampling noise every frame was too slow on CPU
-        // this._velocity = Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * this._simulationTimeElapsed);
-
         if (this._velocityMode === "noise") {
             // This index oscillates between 0 and 9
             this._velocityCacheIndex += 1;
@@ -121,16 +118,14 @@ export default class Fluids {
             solve.diffuse2(dt, 0.01, this._width, this._height, this._velocity, this._velocitySwap);
             this.swapVelocity(dt);
 
+            this.projectVelocity();
+
             solve.advect2(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
             this.swapVelocity(dt);
 
-            // this.projectVelocity(dt);
-            // this.swapVelocity(dt);
+            this.projectVelocity();
 
             //TODO
-            // diffuse
-            // advect
-            // project
             // vorticity confinement
 
         }
@@ -189,9 +184,9 @@ export default class Fluids {
         this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
     }
 
-    projectVelocity(dt) {
-        // advect color into swap using velocity
-        solve.project(dt, this._width, this._height, this._velocity, this._velocitySwap, this._divergence, this._density);
+    projectVelocity() {
+        // Make fluid incompressible by removing divergence
+        solve.project(this._width, this._height, this._velocity, this._pressure, this._divergence);
     }
 
     step(dt) {
