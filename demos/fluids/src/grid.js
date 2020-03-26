@@ -33,7 +33,8 @@ export default class Grid {
     }
 
     static makeCurlGrid(width, height, z) {
-        return this.makeCustomGrid(width, height, 2, (x, y) => { return curl2(x, y, z); });
+        const frequency = 1.0;
+        return this.makeCustomGrid(width, height, 2, (x, y) => { return curl2(frequency * x, frequency * y, z); });
     }
 
     static makeNoiseGrid(width, height, z) {
@@ -50,7 +51,7 @@ export default class Grid {
     static makeUniformGrid1Channel(width, height, value) {
         const channels = 1;
         let grid = new Grid(width, height, channels);
-        grid.eachIndex((r, c) => {
+        grid.eachCell((r, c) => {
             const index = grid.toIndex(r, c);
             grid._dataArray[index] = value;
         });
@@ -63,6 +64,16 @@ export default class Grid {
                 const index = this.toIndex(r, c);
                 for (let channel = 0; channel < this.channels(); channel++) {
                     operation(index + channel);
+                }
+            }
+        }
+    }
+
+    eachCell(operation) {
+        for (let r = 0; r < this.height(); r++) {
+            for (let c = 0; c < this.width(); c++) {
+                for (let channel = 0; channel < this.channels(); channel++) {
+                    operation(r, c);
                 }
             }
         }
@@ -99,15 +110,19 @@ export default class Grid {
         return this._channels * ((r * this._width) + c);
     }
 
+    copy(sourceGrid) {
+        this.copySubGrid(sourceGrid, 0, 0, this._width, this._height);
+    }
+
     // Copy a rectangular region from other grid into this one
     copySubGrid(sourceGrid, startRow, startColumn, width, height) {
-        const endRow = startRow + height;
-        const endColumn = startColumn + width;
+        const endRow = startRow + height - 1;
+        const endColumn = startColumn + width - 1;
         if (startRow < 0 || startColumn < 0 || endRow >= this._height || endColumn >= this._width) {
             throw new Error("Grid index out of bounds");
         }
-        for (let r = startRow; r < endRow; r++) {
-            for (let c = startColumn; c < endColumn; c++) {
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
                 const index = this.toIndex(r, c);
                 for (let channel = 0; channel < this._channels; channel++) {
                     this._dataArray[index + channel] = sourceGrid._dataArray[index + channel];
@@ -187,8 +202,10 @@ export default class Grid {
             return value;
         }
         value[0] = this._dataArray[index + 0]
+        if (isNaN(value[0])) {
+            throw ("Nan value in sample2");
+        }
         value[1] = this._dataArray[index + 1]
-        value[2] = this._dataArray[index + 2]
         return value;
     }
 

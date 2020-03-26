@@ -92,7 +92,7 @@ function updateRes() {
     resetGame();
 }
 
-function step() {
+function updateSimulation() {
     if (!fluidsInstance) {
         return;
     }
@@ -105,7 +105,7 @@ function step() {
     // no more than 1, in seconds
     const delta = Math.min(dt / 1000, 1.0);
 
-    // Wait until enough time has elapsed to render no faster than FPS
+    // Wait until enough time has elapsed to solve and render no more than FPS
     if (delta > 1 / FPS) {
         fluidsInstance.step(delta);
         elapsedTimeInput.value = fluidsInstance._simulationTimeElapsed;
@@ -115,8 +115,7 @@ function step() {
 }
 
 function renderLoop() {
-    step();
-    render();
+    updateSimulation()
     renderRequest = requestAnimationFrame(renderLoop);
 }
 
@@ -134,8 +133,7 @@ function stopIter() {
 }
 
 function incIter() {
-    step();
-    render();
+    updateSimulation();
 }
 
 function doClear() {

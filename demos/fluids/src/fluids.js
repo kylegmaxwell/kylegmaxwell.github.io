@@ -27,24 +27,23 @@ export default class Fluids {
         this._renderMode = "density";
         this._velocityMode = "advect";
         // Fluid velocity
-        this._velocityCache = [];
-        for (let i = 0; i < 10; i++) {
-            this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * i));
-        }
-        this._velocityCacheIndex = 0;
-        // this._velocity = this._velocityCache[this._velocityCacheIndex];// TODO: Should this be deep copy?
+        this.initVelocityCache();
         this._velocity = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
+
+        // Velocity Source
+        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, 2 * noiseSpeed());
+        let that = this;
         // Color / density
-        this._seedColor = Grid.makeCustomGrid(this._width, this._height, 1, (x, y) => {
-            return [1 * noise1(x, y, 0)];
+        this._seedColor = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._seedColor.eachCell((r, c) => {
+            // return [1 * noise1(x, y, 0)];
+            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(r, c));
+            if (isNaN(asdf)) {
+                throw ("Nan value in seed color");
+            }
+            that._seedColor.set1(r, c, asdf);
         });
-        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, noiseSpeed());
-        // this._seedVelocity = Grid.makeCustomGrid(this._width, this._height, 2, (x, y) => {
-        //     let v = glMatrix.vec2.create();
-        //     v[0] = 1;
-        //     v[1] = 0;
-        //     return v;
-        // });
+
         this._color = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._black = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         // Temporary buffer for advection operations
@@ -54,8 +53,18 @@ export default class Fluids {
         this._pressure = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
     }
 
-    toDisplayPixelIndex(r, c, displayScale) {
-        return 4 * (r * this._width * displayScale + c);
+    initVelocityCache() {
+        if (this._velocityCache == null && this._velocityMode === "noise") {
+            this._velocityCache = [];
+            for (let i = 0; i < 10; i++) {
+                this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * i));
+            }
+            this._velocityCacheIndex = 0;
+        }
+    }
+
+    toDisplayPixelIndex(x, y, displayScale) {
+        return 4 * (y * this._width * displayScale + x);
     }
 
     setRenderMode(mode) {
@@ -101,6 +110,7 @@ export default class Fluids {
     updateVelocity(dt) {
 
         if (this._velocityMode === "noise") {
+            this.initVelocityCache();
             // This index oscillates between 0 and 9
             this._velocityCacheIndex += 1;
             this._velocityCacheIndex %= 20;
@@ -109,13 +119,11 @@ export default class Fluids {
                 : this._velocityCacheIndex;
 
             // Look up the velocity from the cached array
-            this._velocity = this._velocityCache[velocityIndex];
+            this._velocity.copy(this._velocityCache[velocityIndex]);
         } else if (this._velocityMode === "advect") {
             this.addVelocity(dt);
 
-            // advect color into swap using velocity
-            // advect(dt, this._width, this._height, this._velocity, this._velocitySwap, this._velocity);
-            solve.diffuse2(dt, 0.01, this._width, this._height, this._velocity, this._velocitySwap);
+            solve.diffuse2(dt, 0.001, this._width, this._height, this._velocity, this._velocitySwap);
             this.swapVelocity(dt);
 
             this.projectVelocity();
@@ -138,7 +146,7 @@ export default class Fluids {
     getBoxOffset() {
         const border = 10;
         const boxWidth = this.getBoxWidth();
-        const seconds = Math.floor(2 * this._simulationTimeElapsed);
+        const seconds = Math.floor(1 * this._simulationTimeElapsed);
         return Math.min(Math.min(0.5 * border + Math.floor((seconds % 5) * 2 * boxWidth), this._width - border), this._height - border);
     }
 
@@ -156,6 +164,7 @@ export default class Fluids {
             // Fade the previous colors
             this._color.dampen(0.9);
         } else if (this._velocityMode === "advect") {
+            this._color.dampen(0.99);
             solve.diffuse1(dt, 0.001, this._width, this._height, this._color, this._colorSwap);
             this.swapColor();
         }

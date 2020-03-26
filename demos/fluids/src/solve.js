@@ -93,7 +93,7 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
     // Stam 03
     // div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] + v[IX(i, j + 1)] - v[IX(i, j - 1)]);
     // p[IX(i, j)] = 0;
-    let h = 1.0 / Math.sqrt(width * height);
+    const h = 1.0 / Math.sqrt(width * height);
     for (let i = 0; i < width; i++) {
         for (let j = 0; j < height; j++) {
             const vxp = ioVelocity.sample2(i + 1, j);
