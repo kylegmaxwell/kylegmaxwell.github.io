@@ -35,13 +35,13 @@ export default class Fluids {
         let that = this;
         // Color / density
         this._seedColor = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
-        this._seedColor.eachCell((r, c) => {
+        this._seedColor.eachCellRowColumn((r, c) => {
             // return [1 * noise1(x, y, 0)];
-            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(r, c));
+            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(c, r));
             if (isNaN(asdf)) {
                 throw ("Nan value in seed color");
             }
-            that._seedColor.set1(r, c, asdf);
+            that._seedColor.set1(c, r, asdf);
         });
 
         this._color = Grid.makeUniformGrid1Channel(this._width, this._height, 0);

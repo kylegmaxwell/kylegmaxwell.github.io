@@ -24,7 +24,7 @@ export default class Grid {
 
         for (let r = 0; r < this._height; r++) {
             for (let c = 0; c < this._width; c++) {
-                const index = this.toIndex(r, c);
+                const index = this.toIndexRowColumn(r, c);
                 for (let channel = 0; channel < this._channels; channel++) {
                     this._dataArray[index + channel] = 0.0;
                 }
@@ -51,8 +51,8 @@ export default class Grid {
     static makeUniformGrid1Channel(width, height, value) {
         const channels = 1;
         let grid = new Grid(width, height, channels);
-        grid.eachCell((r, c) => {
-            const index = grid.toIndex(r, c);
+        grid.eachCellRowColumn((r, c) => {
+            const index = grid.toIndexRowColumn(r, c);
             grid._dataArray[index] = value;
         });
         return grid;
@@ -61,7 +61,7 @@ export default class Grid {
     eachIndex(operation) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
-                const index = this.toIndex(r, c);
+                const index = this.toIndexRowColumn(r, c);
                 for (let channel = 0; channel < this.channels(); channel++) {
                     operation(index + channel);
                 }
@@ -69,7 +69,7 @@ export default class Grid {
         }
     }
 
-    eachCell(operation) {
+    eachCellRowColumn(operation) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
                 for (let channel = 0; channel < this.channels(); channel++) {
@@ -83,7 +83,7 @@ export default class Grid {
     setCustomValues(valueFunction) {
         for (let r = 0; r < this.height(); r++) {
             for (let c = 0; c < this.width(); c++) {
-                const index = this.toIndex(r, c);
+                const index = this.toIndexRowColumn(r, c);
                 const frequency = noiseFrequency();
                 const sampleX = frequency * c;
                 const sampleY = frequency * r;
@@ -106,7 +106,11 @@ export default class Grid {
         return this._channels;
     }
 
-    toIndex(r, c) {
+    toIndexXY(x, y) {
+        return this._channels * ((y * this._width) + x);
+    }
+
+    toIndexRowColumn(r, c) {
         return this._channels * ((r * this._width) + c);
     }
 
@@ -123,7 +127,7 @@ export default class Grid {
         }
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const index = this.toIndex(r, c);
+                const index = this.toIndexRowColumn(r, c);
                 for (let channel = 0; channel < this._channels; channel++) {
                     this._dataArray[index + channel] = sourceGrid._dataArray[index + channel];
                 }
@@ -140,30 +144,30 @@ export default class Grid {
         });
     }
 
-    set1(r, c, value) {
+    set1(x, y, value) {
         if (this._channels !== 1) {
             throw "Wrong sample function";
         }
-        let index = this.toIndex(r, c);
+        let index = this.toIndexXY(x, y);
         this._dataArray[index] = value;
     }
 
-    set2(r, c, value) {
+    set2(x, y, value) {
         if (this._channels !== 2) {
             throw "Wrong sample function";
         }
-        let index = this.toIndex(r, c);
+        let index = this.toIndexXY(x, y);
         this._dataArray[index + 0] = value[0];
         this._dataArray[index + 1] = value[1];
     }
 
-    sample1(r, c) {
+    sample1(x, y) {
         if (this._channels !== 1) {
             throw "Wrong sample function";
         }
-        let index = this.toIndex(r, c);
+        let index = this.toIndexXY(x, y);
         let value = 0.0;
-        if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
+        if (y < 0 || x < 0 || y >= this._height || x >= this._width) {
             // Empty boundary condition
             return value;
         }
@@ -171,33 +175,34 @@ export default class Grid {
         return value;
     }
 
-    sample1Interp(r, c) {
+    sample1Interp(x, y) {
         // Bilinear interpolate
-        const rm = Math.floor(r);
-        const rp = Math.ceil(r);
-        const t = (r - rm);//(rp-rm should be 1)
+        // m is for minus, p is for plus
+        const ym = Math.floor(y);
+        const yp = Math.ceil(y);
+        const t = (y - ym);//(rp-rm should be 1)
         const tm = 1.0 - t;
-        const cm = Math.floor(c);
-        const cp = Math.ceil(c);
-        const u = (c - cm);//(cp-cm should be 1)
+        const xm = Math.floor(x);
+        const xp = Math.ceil(x);
+        const u = (x - xm);//(cp-cm should be 1)
         const um = 1.0 - u;
 
         // vertical lerp left side
-        let lerpTm = tm * this.sample1(rm, cm) + t * this.sample1(rp, cm);
+        let lerpTm = tm * this.sample1(xm, ym) + t * this.sample1(xm, yp);
         // vertical lerp right side
-        let lerpTp = tm * this.sample1(rm, cp) + t * this.sample1(rp, cp);
+        let lerpTp = tm * this.sample1(xp, ym) + t * this.sample1(xp, yp);
         // horizontal lerp both
         let lerpBoth = um * lerpTm + u * lerpTp;
         return lerpBoth;
     }
 
-    sample2(r, c) {
+    sample2(x, y) {
         if (this._channels !== 2) {
             throw "Wrong sample function";
         }
-        let index = this.toIndex(r, c);
+        let index = this.toIndexXY(x, y);
         let value = glMatrix.vec2.create();
-        if (r < 0 || c < 0 || r >= this._height || c >= this._width) {
+        if (y < 0 || x < 0 || y >= this._height || x >= this._width) {
             // Empty boundary condition
             return value;
         }
@@ -210,29 +215,30 @@ export default class Grid {
     }
 
 
-    sample2Nearest(r, c) {
+    sample2Nearest(x, y) {
         return this.sample2(
-            Math.min(this._height, Math.max(0, Math.floor(r))),
-            Math.min(this._width, Math.max(0, Math.floor(c))));
+            Math.min(this._width, Math.max(0, Math.floor(x))),
+            Math.min(this._height, Math.max(0, Math.floor(y)))
+        );
     }
 
     // rp,cm  rp,cp
     // rm,cm  rm,cp
-    sample2Interp(r, c) {
+    sample2Interp(x, y) {
         // Bilinear interpolate
-        const rm = Math.floor(r);
-        const rp = Math.ceil(r);
-        const t = (r - rm);//(rp-rm should be 1)
-        const cm = Math.floor(c);
-        const cp = Math.ceil(c);
-        const u = (c - cm);//(cp-cm should be 1)
+        const ym = Math.floor(y);
+        const yp = Math.ceil(y);
+        const t = (y - ym);//(rp-rm should be 1)
+        const xm = Math.floor(x);
+        const xp = Math.ceil(x);
+        const u = (x - xm);//(cp-cm should be 1)
 
         // vertical lerp left side
         let lerpTm = glMatrix.vec2.create();
-        glMatrix.vec2.lerp(lerpTm, this.sample2(rm, cm), this.sample2(rp, cm), t);
+        glMatrix.vec2.lerp(lerpTm, this.sample2(xm, ym), this.sample2(xm, yp), t);
         // vertical lerp right side
         let lerpTp = glMatrix.vec2.create();
-        glMatrix.vec2.lerp(lerpTp, this.sample2(rm, cp), this.sample2(rp, cp), t);
+        glMatrix.vec2.lerp(lerpTp, this.sample2(xp, ym), this.sample2(xp, yp), t);
         // horizontal lerp both
         let lerpBoth = glMatrix.vec2.create();
         glMatrix.vec2.lerp(lerpBoth, lerpTm, lerpTp, u);
