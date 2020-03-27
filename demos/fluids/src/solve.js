@@ -3,7 +3,8 @@
 
 import { advectionScale } from './constants.js'
 
-const diffusionScale = 0.001;
+let tmpV = glMatrix.vec2.create();
+let tmpSample2 = glMatrix.vec2.create();
 
 // Advect colors by velocity to get movement
 // Both colors and velocities must be 2 components
@@ -11,8 +12,8 @@ export function advect2(dt, width, height, source, destination, velocities) {
     const scale = advectionScale() * dt;
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            const velocity = velocities.sample2(x, y);
-            const sample = source.sample2Interp(x - velocity[0] * scale, y - velocity[1] * scale);
+            const velocity = velocities.sample2(x, y, tmpSample2);
+            const sample = source.sample2Interp(x - velocity[0] * scale, y - velocity[1] * scale, tmpV);
             destination.set2(x, y, sample);
         }
     }
@@ -22,7 +23,7 @@ export function advect1(dt, width, height, source, destination, velocities) {
     const scale = advectionScale() * dt;
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            const velocity = velocities.sample2(x, y);
+            const velocity = velocities.sample2(x, y, tmpSample2);
             const sample = source.sample1Interp(x - velocity[0] * scale, y - velocity[1] * scale);
             destination.set1(x, y, sample);
         }
@@ -60,25 +61,27 @@ export function diffuse1(dt, diffusionScale, width, height, inDensity, outDensit
 export function diffuse2(dt, diffusionScale, width, height, inDensity, outDensity) {
     const a = dt * diffusionScale * width * height;
     const NUM_ITERATIONS = 20;
-    // let neighborSum = glMatrix.vec2.create();
     let result = glMatrix.vec2.create();
     for (let k = 0; k < NUM_ITERATIONS; k++) {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
                 // Evaluate this formula in terms of glmatrix operations
                 // outDensity = (inDensity + a*neighborsum)/(1+4*a);
-
+                result[0] = 0;
+                result[1] = 0;
                 // sum neighbors
-                glMatrix.vec2.add(result,
-                    outDensity.sample2(i - 1, j), outDensity.sample2(i + 1, j));
                 glMatrix.vec2.add(result, result,
-                    outDensity.sample2(i, j - 1));
+                    outDensity.sample2(i - 1, j, tmpSample2));
                 glMatrix.vec2.add(result, result,
-                    outDensity.sample2(i, j + 1));
+                    outDensity.sample2(i + 1, j, tmpSample2));
+                glMatrix.vec2.add(result, result,
+                    outDensity.sample2(i, j - 1, tmpSample2));
+                glMatrix.vec2.add(result, result,
+                    outDensity.sample2(i, j + 1, tmpSample2));
                 // times a
                 glMatrix.vec2.scale(result, result, a);
                 // add input
-                glMatrix.vec2.add(result, result, inDensity.sample2(i, j));
+                glMatrix.vec2.add(result, result, inDensity.sample2(i, j, tmpSample2));
                 // divide by scale
                 glMatrix.vec2.scale(result, result, 1 / (1 + 4 * a));
                 outDensity.set2(i, j, result);
@@ -96,11 +99,11 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
     const h = 1.0 / Math.sqrt(width * height);
     for (let i = 0; i < width; i++) {
         for (let j = 0; j < height; j++) {
-            const vxp = ioVelocity.sample2(i + 1, j);
-            const vxm = ioVelocity.sample2(i - 1, j);
-            const vyp = ioVelocity.sample2(i, j + 1);
-            const vym = ioVelocity.sample2(i, j - 1);
-            const div = -0.5 * h * (vxp[0] - vxm[0] + vyp[1] - vym[1]);
+            const vxp0 = ioVelocity.sample2(i + 1, j, tmpSample2)[0];
+            const vxm0 = ioVelocity.sample2(i - 1, j, tmpSample2)[0];
+            const vyp1 = ioVelocity.sample2(i, j + 1, tmpSample2)[1];
+            const vym1 = ioVelocity.sample2(i, j - 1, tmpSample2)[1];
+            const div = -0.5 * h * (vxp0 - vxm0 + vyp1 - vym1);
             ioDivergence.set1(i, j, div);
             ioPressure.set1(i, j, 0.0);
         }
@@ -131,7 +134,7 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
         for (let j = 0; j < height; j++) {
 
             //copy to next matrix w/o divergance
-            let vel = ioVelocity.sample2(i, j);
+            let vel = ioVelocity.sample2(i, j, tmpSample2);
 
             vel.x = vel.x - 0.5 *
                 (ioPressure.sample1(i + 1, j) - ioPressure.sample1(i - 1, j)) / h;

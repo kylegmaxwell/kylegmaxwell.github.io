@@ -2,8 +2,10 @@
 
 import * as solve from './solve.js'
 import Grid from './grid.js'
-import { noise1 } from './curl.js';
+// import { noise1 } from './curl.js';
 import { noiseSpeed } from './constants.js';
+
+let tmpV = glMatrix.vec2.create();
 
 /**
  * Convert a number to 8 bit int.
@@ -37,7 +39,8 @@ export default class Fluids {
         this._seedColor = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._seedColor.eachCellRowColumn((r, c) => {
             // return [1 * noise1(x, y, 0)];
-            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(c, r));
+            let value = glMatrix.vec2.create();
+            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(c, r, value));
             if (isNaN(asdf)) {
                 throw ("Nan value in seed color");
             }
@@ -97,7 +100,7 @@ export default class Fluids {
                     pixels[index + 1] = toFixed(v);
                     pixels[index + 2] = toFixed(v);
                 } else {
-                    const v = this._velocity.sample2Interp(xScaled, yScaled);
+                    const v = this._velocity.sample2Interp(xScaled, yScaled, tmpV);
                     pixels[index + 0] = toFixed(v[0]);
                     pixels[index + 1] = toFixed(v[1]);
                     pixels[index + 2] = toFixed(0);
@@ -155,8 +158,8 @@ export default class Fluids {
         const boxWidth = this.getBoxWidth();
         const boxOffset = this.getBoxOffset();
         this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
-        const boxBorder = 5;
-        this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+        // const boxBorder = 5;
+        // this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
     }
 
     updateDensity(dt) {
@@ -199,7 +202,7 @@ export default class Fluids {
     }
 
     step(dt) {
-        const scaledDeltaTime = 0.2 * dt;
+        const scaledDeltaTime = 0.4 * dt;
 
         this._simulationTimeElapsed += scaledDeltaTime;
 

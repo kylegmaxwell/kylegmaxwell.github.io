@@ -7,7 +7,7 @@ var fluidsInstance = null;
 var ctx = null;
 var paintMode = false;
 // Rendering is throttled to this frame rate
-var FPS = 10;
+var FPS = 15;
 var renderRequest = null;
 var lastRenderTime = null;
 

@@ -6,6 +6,12 @@ import * as glm from '../lib/gl-matrix.js'
 import { noise1, curl2 } from './curl.js'
 import { noiseFrequency } from './constants.js'
 
+// hidden variables to save on re-allocation for every call
+let lerpTmV = glMatrix.vec2.create();
+let lerpTpV = glMatrix.vec2.create();
+let tmpV1 = glMatrix.vec2.create();
+let tmpV2 = glMatrix.vec2.create();
+
 /**
  * Represents a 2d float32 buffer 
  * {int} width
@@ -34,7 +40,9 @@ export default class Grid {
 
     static makeCurlGrid(width, height, z) {
         const frequency = 1.0;
-        return this.makeCustomGrid(width, height, 2, (x, y) => { return curl2(frequency * x, frequency * y, z); });
+        return this.makeCustomGrid(width, height, 2, (x, y) => {
+            return curl2(frequency * x, frequency * y, z);
+        });
     }
 
     static makeNoiseGrid(width, height, z) {
@@ -196,13 +204,14 @@ export default class Grid {
         return lerpBoth;
     }
 
-    sample2(x, y) {
+    sample2(x, y, value) {
         if (this._channels !== 2) {
             throw "Wrong sample function";
         }
         let index = this.toIndexXY(x, y);
-        let value = glMatrix.vec2.create();
         if (y < 0 || x < 0 || y >= this._height || x >= this._width) {
+            value[0] = 0;
+            value[1] = 0;
             // Empty boundary condition
             return value;
         }
@@ -215,16 +224,17 @@ export default class Grid {
     }
 
 
-    sample2Nearest(x, y) {
+    sample2Nearest(x, y, value) {
         return this.sample2(
             Math.min(this._width, Math.max(0, Math.floor(x))),
-            Math.min(this._height, Math.max(0, Math.floor(y)))
+            Math.min(this._height, Math.max(0, Math.floor(y))),
+            value
         );
     }
 
     // rp,cm  rp,cp
     // rm,cm  rm,cp
-    sample2Interp(x, y) {
+    sample2Interp(x, y, result) {
         // Bilinear interpolate
         const ym = Math.floor(y);
         const yp = Math.ceil(y);
@@ -234,14 +244,11 @@ export default class Grid {
         const u = (x - xm);//(cp-cm should be 1)
 
         // vertical lerp left side
-        let lerpTm = glMatrix.vec2.create();
-        glMatrix.vec2.lerp(lerpTm, this.sample2(xm, ym), this.sample2(xm, yp), t);
+        glMatrix.vec2.lerp(lerpTmV, this.sample2(xm, ym, tmpV1), this.sample2(xm, yp, tmpV2), t);
         // vertical lerp right side
-        let lerpTp = glMatrix.vec2.create();
-        glMatrix.vec2.lerp(lerpTp, this.sample2(xp, ym), this.sample2(xp, yp), t);
+        glMatrix.vec2.lerp(lerpTpV, this.sample2(xp, ym, tmpV1), this.sample2(xp, yp, tmpV2), t);
         // horizontal lerp both
-        let lerpBoth = glMatrix.vec2.create();
-        glMatrix.vec2.lerp(lerpBoth, lerpTm, lerpTp, u);
-        return lerpBoth;
+        glMatrix.vec2.lerp(result, lerpTmV, lerpTpV, u);
+        return result;
     }
 }
