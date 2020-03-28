@@ -33,18 +33,18 @@ export default class Fluids {
         this._velocity = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
 
         // Velocity Source
-        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, 2 * constants.noiseSpeed());
+        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, constants.noiseSpeed(), 5);
         let that = this;
         // Color / density
         this._seedColor = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._seedColor.eachCellRowColumn((r, c) => {
             // return [1 * noise1(x, y, 0)];
             let value = glMatrix.vec2.create();
-            let asdf = glMatrix.vec2.length(that._seedVelocity.sample2(c, r, value));
-            if (isNaN(asdf)) {
+            let magnitude = glMatrix.vec2.length(that._seedVelocity.sample2(c, r, value));
+            if (isNaN(magnitude)) {
                 throw ("Nan value in seed color");
             }
-            that._seedColor.set1(c, r, asdf);
+            that._seedColor.set1(c, r, magnitude);
         });
 
         this._color = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
@@ -60,7 +60,7 @@ export default class Fluids {
         if (this._velocityCache == null && this._velocityMode === "noise") {
             this._velocityCache = [];
             for (let i = 0; i < 10; i++) {
-                this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, constants.noiseSpeed() * i));
+                this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, constants.noiseSpeed() * i, 1));
             }
             this._velocityCacheIndex = 0;
         }
@@ -104,8 +104,10 @@ export default class Fluids {
         this._pushP = p;//position
 
         // Temporary hack, consistent velocity to the right
-        this._pushV[0] = 1;
-        this._pushV[1] = 0;
+        if (this._pushV != null) {
+            this._pushV[0] = -1;
+            this._pushV[1] = 0;
+        }
     }
 
     addDensityPush() {
@@ -114,7 +116,8 @@ export default class Fluids {
         }
         let d = glMatrix.vec2.length(this._pushV);
         const scale = 1.5;
-        this._color.addRegion([d], 1, this._pushP[1], this._pushP[0], 5, 5, scale);
+        const width = this.getBoxWidth();
+        this._color.addRegion([d], 1, this._pushP[1], this._pushP[0], width, width, scale);
     }
 
     addVelocityPush() {
@@ -122,7 +125,8 @@ export default class Fluids {
             return;
         }
         const scale = 1.5;
-        this._velocity.addRegion(this._pushV, 2, this._pushP[1], this._pushP[0], 5, 5, scale);
+        const width = this.getBoxWidth();
+        this._velocity.addRegion(this._pushV, 2, this._pushP[1], this._pushP[0], width, width, scale);
     }
 
     swapColor() {
@@ -142,7 +146,7 @@ export default class Fluids {
     addVelocity() {
         const boxWidth = this.getBoxWidth();
         const boxOffset = this.getBoxOffset();
-        // this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
+        this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
         this.addVelocityPush();
     }
 

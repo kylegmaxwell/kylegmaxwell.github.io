@@ -38,10 +38,12 @@ export default class Grid {
         }
     }
 
-    static makeCurlGrid(width, height, z) {
+    static makeCurlGrid(width, height, z, scale) {
         const frequency = 1.0;
         return this.makeCustomGrid(width, height, 2, (x, y) => {
-            return curl2(frequency * x, frequency * y, z);
+            let curlVec = curl2(frequency * x, frequency * y, z);
+            glMatrix.vec2.scale(curlVec, curlVec, scale);
+            return curlVec;
         });
     }
 
