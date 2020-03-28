@@ -52,21 +52,32 @@ function handleLoad() {
     playIter();
 }
 
+let dragV = glMatrix.vec2.create();
+let prevP = glMatrix.vec2.create();
+let mouseP = glMatrix.vec2.create();
 var inDrag = false;
 function handleMouse(e) {
+
     if (e.type === 'mousedown') {
         inDrag = true;
+        mouseP[0] = Math.floor(e.offsetX / displayScale);
+        mouseP[1] = Math.floor(e.offsetY / displayScale);
+        prevP[0] = mouseP[0];
+        prevP[1] = mouseP[1];
     } else if (e.type === 'mouseup') {
         inDrag = false;
+    } else if (e.type === 'mousemove') {
+        prevP[0] = mouseP[0];
+        prevP[1] = mouseP[1];
+        mouseP[0] = Math.floor(e.offsetX / displayScale);
+        mouseP[1] = Math.floor(e.offsetY / displayScale);
     }
     if (inDrag) {
-        var x = e.offsetX;
-        var y = e.offsetY;
-        ctx.fillStyle = "rgb(255, 255, 255)";
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, 2 * Math.PI);
-        ctx.fill();
-        render();
+        dragV[0] = mouseP[0] - prevP[0];
+        dragV[1] = mouseP[1] - prevP[1];
+        fluidsInstance.setPush(dragV, mouseP);
+    } else {
+        fluidsInstance.setPush(null, null);
     }
 }
 

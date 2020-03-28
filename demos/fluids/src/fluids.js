@@ -3,7 +3,7 @@
 import * as solve from './solve.js'
 import Grid from './grid.js'
 // import { noise1 } from './curl.js';
-import { noiseSpeed } from './constants.js';
+import * as constants from './constants.js';
 
 let tmpV = glMatrix.vec2.create();
 
@@ -33,7 +33,7 @@ export default class Fluids {
         this._velocity = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
 
         // Velocity Source
-        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, 2 * noiseSpeed());
+        this._seedVelocity = Grid.makeCurlGrid(this._width, this._height, 2 * constants.noiseSpeed());
         let that = this;
         // Color / density
         this._seedColor = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
@@ -60,7 +60,7 @@ export default class Fluids {
         if (this._velocityCache == null && this._velocityMode === "noise") {
             this._velocityCache = [];
             for (let i = 0; i < 10; i++) {
-                this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, noiseSpeed() * i));
+                this._velocityCache.push(Grid.makeCurlGrid(this._width, this._height, constants.noiseSpeed() * i));
             }
             this._velocityCacheIndex = 0;
         }
@@ -95,14 +95,27 @@ export default class Fluids {
                 const yScaled = y / displayScale;
                 const index = this.toDisplayPixelIndex(x, y, displayScale);
                 if (this._renderMode === "density") {
-                    const v = this._color.sample1Interp(xScaled, yScaled);
+                    const densityScale = constants.renderScale();
+                    const v = densityScale * this._color.sample1Interp(xScaled, yScaled);
+                    if (isNaN(v)) {
+                        throw "NaN render v"
+                    } if (v < 0) {
+                        throw "negative v"
+                    }
                     pixels[index + 0] = toFixed(v);
                     pixels[index + 1] = toFixed(v);
                     pixels[index + 2] = toFixed(v);
                 } else {
                     const v = this._velocity.sample2Interp(xScaled, yScaled, tmpV);
-                    pixels[index + 0] = toFixed(v[0]);
-                    pixels[index + 1] = toFixed(v[1]);
+                    const velocityScale = constants.renderScale();
+                    if (isNaN(v[0])) {
+                        throw "NaN render v0"
+                    }
+                    if (isNaN(v[1])) {
+                        throw "NaN render v1"
+                    }
+                    pixels[index + 0] = toFixed(v[0] * velocityScale);
+                    pixels[index + 1] = toFixed(v[1] * velocityScale);
                     pixels[index + 2] = toFixed(0);
                 }
                 pixels[index + 3] = toFixed(1);
@@ -124,9 +137,9 @@ export default class Fluids {
             // Look up the velocity from the cached array
             this._velocity.copy(this._velocityCache[velocityIndex]);
         } else if (this._velocityMode === "advect") {
-            this.addVelocity(dt);
+            this.addVelocity();
 
-            solve.diffuse2(dt, 0.001, this._width, this._height, this._velocity, this._velocitySwap);
+            solve.diffuse2(dt, constants.diffusionScale(), this._width, this._height, this._velocity, this._velocitySwap);
             this.swapVelocity(dt);
 
             this.projectVelocity();
@@ -153,13 +166,14 @@ export default class Fluids {
         return Math.min(Math.min(0.5 * border + Math.floor((seconds % 5) * 2 * boxWidth), this._width - border), this._height - border);
     }
 
-    addColor() {
+    addDensity() {
         // Copy a patch from the seed grid at an interesting location
         const boxWidth = this.getBoxWidth();
         const boxOffset = this.getBoxOffset();
         this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
         // const boxBorder = 5;
         // this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+        this.addDensityPush();
     }
 
     updateDensity(dt) {
@@ -167,13 +181,18 @@ export default class Fluids {
             // Fade the previous colors
             this._color.dampen(0.9);
         } else if (this._velocityMode === "advect") {
+            // Hack, remove density a little bit
             this._color.dampen(0.99);
-            solve.diffuse1(dt, 0.001, this._width, this._height, this._color, this._colorSwap);
+
+            solve.diffuse1(dt, constants.diffusionScale(), this._width, this._height, this._color, this._colorSwap);
             this.swapColor();
         }
         // advect color into swap using velocity
         solve.advect1(dt, this._width, this._height, this._color, this._colorSwap, this._velocity);
         this.swapColor();
+
+        // Add density
+        this.addDensity();
     }
 
     swapColor() {
@@ -190,10 +209,37 @@ export default class Fluids {
         this._velocitySwap = tmp;
     }
 
-    addVelocity(dt) {
+    setPush(v, p) {
+        this._pushV = v;//velocity
+        this._pushP = p;//position
+
+        // Temporary hack, consistent velocity to the right
+        this._pushV[0] = 1;
+        this._pushV[1] = 0;
+    }
+
+    addDensityPush() {
+        if (this._pushV == null || this._pushP == null) {
+            return;
+        }
+        let d = glMatrix.vec2.length(this._pushV);
+        const scale = 1.5;
+        this._color.addRegion([d], 1, this._pushP[1], this._pushP[0], 5, 5, scale);
+    }
+
+    addVelocityPush() {
+        if (this._pushV == null || this._pushP == null) {
+            return;
+        }
+        const scale = 1.5;
+        this._velocity.addRegion(this._pushV, 2, this._pushP[1], this._pushP[0], 5, 5, scale);
+    }
+
+    addVelocity() {
         const boxWidth = this.getBoxWidth();
         const boxOffset = this.getBoxOffset();
-        this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
+        // this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
+        this.addVelocityPush();
     }
 
     projectVelocity() {
@@ -212,7 +258,5 @@ export default class Fluids {
         // Update color using velocity
         this.updateDensity(scaledDeltaTime);
 
-        // Add density
-        this.addColor();
     }
 }

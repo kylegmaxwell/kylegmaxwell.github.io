@@ -10,10 +10,19 @@ export function noiseFrequency() {
 
 // Multiplier on advection speed
 export function advectionScale() {
-    return 1.0;
+    return 2.0;
+}
+
+// Multiplier on rendered intensity of pixels
+export function renderScale() {
+    return 0.3;
 }
 
 // Rate of noise evolution
 export function noiseSpeed() {
     return 0.1;
+}
+
+export function diffusionScale() {
+    return 0.0005;
 }

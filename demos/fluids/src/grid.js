@@ -143,6 +143,24 @@ export default class Grid {
         }
     }
 
+    // Add value to a rectangular region from value of vector
+    addRegion(v, channels, startRow, startColumn, width, height, scale) {
+        const endRow = startRow + height - 1;
+        const endRowClamped = Math.min(Math.max(0, endRow), this._height - 1);
+        const endColumn = startColumn + width - 1;
+        const endColumnClamped = Math.min(Math.max(0, endColumn), this._width - 1);
+        const startRowClamped = Math.min(Math.max(0, startRow), this._height - 1);
+        const startColumnClamped = Math.min(Math.max(0, startColumn), this._width - 1);
+        for (let r = startRowClamped; r <= endRowClamped; r++) {
+            for (let c = startColumnClamped; c <= endColumnClamped; c++) {
+                const index = this.toIndexRowColumn(r, c);
+                for (let channel = 0; channel < channels; channel++) {
+                    this._dataArray[index + channel] += v[channel] * scale;
+                }
+            }
+        }
+    }
+
     // Dampen by an exponential factor
     // TODO this should use an exponential decay function to be time step aware
     dampen(factor) {
