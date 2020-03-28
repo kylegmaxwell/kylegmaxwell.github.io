@@ -6,6 +6,17 @@ import { advectionScale } from './constants.js'
 let tmpV = glMatrix.vec2.create();
 let tmpSample2 = glMatrix.vec2.create();
 
+export function advect1(dt, width, height, source, destination, velocities) {
+    const scale = advectionScale() * dt;
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+            const velocity = velocities.sample2(x, y, tmpSample2);
+            const sample = source.sample1Interp(x - velocity[0] * scale, y - velocity[1] * scale);
+            destination.set1(x, y, sample);
+        }
+    }
+}
+
 // Advect colors by velocity to get movement
 // Both colors and velocities must be 2 components
 export function advect2(dt, width, height, source, destination, velocities) {
@@ -15,17 +26,6 @@ export function advect2(dt, width, height, source, destination, velocities) {
             const velocity = velocities.sample2(x, y, tmpSample2);
             const sample = source.sample2Interp(x - velocity[0] * scale, y - velocity[1] * scale, tmpV);
             destination.set2(x, y, sample);
-        }
-    }
-}
-
-export function advect1(dt, width, height, source, destination, velocities) {
-    const scale = advectionScale() * dt;
-    for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
-            const velocity = velocities.sample2(x, y, tmpSample2);
-            const sample = source.sample1Interp(x - velocity[0] * scale, y - velocity[1] * scale);
-            destination.set1(x, y, sample);
         }
     }
 }
