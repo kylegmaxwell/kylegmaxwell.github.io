@@ -10,7 +10,7 @@ export function noiseFrequency() {
 
 // Multiplier on advection speed
 export function advectionScale() {
-    return 50.0;
+    return 1.0;
 }
 
 // Rate of noise evolution
