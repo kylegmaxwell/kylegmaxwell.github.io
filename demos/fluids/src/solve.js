@@ -15,6 +15,7 @@ export function advect1(dt, width, height, source, destination, velocities) {
             destination.set1(x, y, sample);
         }
     }
+    destination.setBoundary(1);
 }
 
 // Advect colors by velocity to get movement
@@ -28,6 +29,7 @@ export function advect2(dt, width, height, source, destination, velocities) {
             destination.set2(x, y, sample);
         }
     }
+    destination.setBoundary(2);
 }
 
 // diffusion based solver using Gauss-Seidel relaxation from Stam 03
@@ -54,6 +56,7 @@ export function diffuse1(dt, diffusionScale, width, height, inDensity, outDensit
                 outDensity.set1(i, j, result);
             }
         }
+        outDensity.setBoundary(1);
     }
 }
 
@@ -87,6 +90,7 @@ export function diffuse2(dt, diffusionScale, width, height, inDensity, outDensit
                 outDensity.set2(i, j, result);
             }
         }
+        outDensity.setBoundary(2);
     }
 }
 
@@ -96,6 +100,7 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
     // Stam 03
     // div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] + v[IX(i, j + 1)] - v[IX(i, j - 1)]);
     // p[IX(i, j)] = 0;
+    // const h = 1.0;
     const h = 1.0 / Math.sqrt(width * height);
     for (let i = 0; i < width; i++) {
         for (let j = 0; j < height; j++) {
@@ -125,6 +130,7 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
                 ioPressure.set1(i, j, p);
             }
         }
+        ioPressure.setBoundary(1);
     }
 
     // Stam 03
@@ -144,4 +150,6 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
             ioVelocity.set2(i, j, vel);
         }
     }
+    ioVelocity.setBoundary(2);
+
 }

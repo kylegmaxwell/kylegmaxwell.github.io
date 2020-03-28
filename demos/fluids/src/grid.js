@@ -69,8 +69,8 @@ export default class Grid {
     }
 
     eachIndex(operation) {
-        for (let r = 0; r < this.height(); r++) {
-            for (let c = 0; c < this.width(); c++) {
+        for (let r = 0; r < this._height; r++) {
+            for (let c = 0; c < this._width; c++) {
                 const index = this.toIndexRowColumn(r, c);
                 for (let channel = 0; channel < this.channels(); channel++) {
                     operation(index + channel);
@@ -80,8 +80,8 @@ export default class Grid {
     }
 
     eachCellRowColumn(operation) {
-        for (let r = 0; r < this.height(); r++) {
-            for (let c = 0; c < this.width(); c++) {
+        for (let r = 0; r < this._height; r++) {
+            for (let c = 0; c < this._width; c++) {
                 for (let channel = 0; channel < this.channels(); channel++) {
                     operation(r, c);
                 }
@@ -91,8 +91,8 @@ export default class Grid {
 
     // @param valueFunction (row,column)->float(s)
     setCustomValues(valueFunction) {
-        for (let r = 0; r < this.height(); r++) {
-            for (let c = 0; c < this.width(); c++) {
+        for (let r = 0; r < this._height; r++) {
+            for (let c = 0; c < this._width; c++) {
                 const index = this.toIndexRowColumn(r, c);
                 const frequency = noiseFrequency();
                 const sampleX = frequency * c;
@@ -114,6 +114,10 @@ export default class Grid {
 
     channels() {
         return this._channels;
+    }
+
+    toIndexXYC(x, y, channel) {
+        return this._channels * ((y * this._width) + x) + channel;
     }
 
     toIndexXY(x, y) {
@@ -163,6 +167,41 @@ export default class Grid {
         }
     }
 
+    setBoundary(channelCount) {
+        // vector velocity has slightly different boundary conditions
+        const isV = channelCount === 2;
+        for (let channel = 0; channel < channelCount; channel++) {
+            const isX = isV && channel === 0;
+            const xFlip = isX ? -1 : 1;
+            const isY = isV && channel === 1;
+            const yFlip = isY ? -1 : 1;
+            // left and right, skipping corners
+            const maxX = this._width - 1;
+            const maxY = this._height - 1;
+            for (let i = 1; i < maxY; i++) {
+                // x[IX(0, i)] = b == 1 ?–x[IX(1, i)] : x[IX(1, i)];
+                // x[IX(N + 1, i)] = b == 1 ?–x[IX(N, i)] : x[IX(N, i)];
+                this.set(0, i, channel, xFlip * this.get(1, i, channel));
+                this.set(maxX, i, channel, xFlip * this.get(maxX - 1, i, channel));
+            }
+            // top and bottom, skipping corners
+            for (let j = 1; j < maxX; j++) {
+                // x[IX(i, 0)] = b == 2 ?–x[IX(i, 1)] : x[IX(i, 1)];
+                // x[IX(i, N + 1)] = b == 2 ?–x[IX(i, N)] : x[IX(i, N)];
+                this.set(j, 0, channel, yFlip * this.get(j, 1, channel));
+                this.set(j, maxY, channel, yFlip * this.get(j, maxY - 1, channel));
+            }
+            // x[IX(0, 0)] = 0.5 * (x[IX(1, 0)] + x[IX(0, 1)]);
+            // x[IX(0, N + 1)] = 0.5 * (x[IX(1, N + 1)] + x[IX(0, N)]);
+            // x[IX(N + 1, 0)] = 0.5 * (x[IX(N, 0)] + x[IX(N + 1, 1)]);
+            // x[IX(N + 1, N + 1)] = 0.5 * (x[IX(N, N + 1)] + x[IX(N + 1, N)]);
+            this.set(0, 0, channel, 0.5 * (this.get(1, 0, channel) + this.get(0, 1, channel)));
+            this.set(0, maxY, channel, 0.5 * (this.get(1, maxY, channel) + this.get(0, maxY - 1, channel)));
+            this.set(maxX, 0, channel, 0.5 * (this.get(maxX - 1, 0, channel) + this.get(maxX, 1, channel)));
+            this.set(maxX, maxY, channel, 0.5 * (this.get(maxX - 1, maxY, channel) + this.get(maxX, maxY - 1, channel)));
+        }
+    }
+
     // Dampen by an exponential factor
     // TODO this should use an exponential decay function to be time step aware
     dampen(factor) {
@@ -170,6 +209,22 @@ export default class Grid {
         this.eachIndex((index) => {
             this._dataArray[index] = factor * this._dataArray[index];
         });
+    }
+
+    set(x, y, channel, value) {
+        if (channel >= this._channels) {
+            throw "Invalid channel index";
+        }
+        const index = this.toIndexXYC(x, y, channel);
+        this._dataArray[index] = value;
+    }
+
+    get(x, y, channel) {
+        if (channel >= this._channels) {
+            throw "Invalid channel index";
+        }
+        const index = this.toIndexXYC(x, y, channel);
+        return this._dataArray[index];
     }
 
     set1(x, y, value) {
