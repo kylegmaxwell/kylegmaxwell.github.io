@@ -192,7 +192,6 @@ export default class Fluids {
     }
 
     addVelocityBox(position, velocity) {
-        console.log(position, velocity);
         const scale = constants.userAddVelocityScale();
         const width = this.getBoxWidth();
         const halfWidth = Math.floor(width / 2);
