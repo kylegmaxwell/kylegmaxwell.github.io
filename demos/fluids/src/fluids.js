@@ -83,6 +83,11 @@ export default class Fluids {
         this._useVorticityConfinement = true;
         this._addExtraFluidSources = true;
         this._colorIndex = 0;
+        this._touches = [];
+    }
+
+    setTouches(touchList) {
+        this._touches = touchList;
     }
 
     setUseVorticityConfinement(enable) {
@@ -140,6 +145,7 @@ export default class Fluids {
             }
         }
         this.addDensityPush();
+        this.addDensityTouch();
     }
 
     setPush(v, p, dragIndex) {
@@ -148,27 +154,58 @@ export default class Fluids {
         this._colorIndex = dragIndex;
     }
 
+    addDensityTouch() {
+        for (const touch of this._touches) {
+            this.addDensityBox(touch.identifier, touch.position, touch.velocity);
+        }
+    }
+
+    colorFromIndex(index) {
+        return smokeColors[index % smokeColors.length];
+    }
+
+    addDensityBox(index, position, velocity) {
+        const d = Math.max(Math.sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1]), 1.0);
+        const scale = constants.userAddDensityScale();
+        const width = this.getBoxWidth();
+        const color = this.colorFromIndex(index);
+        const halfWidth = Math.floor(width / 2);
+        const px = Math.floor(position[1]) - halfWidth;
+        const py = Math.floor(position[0]) - halfWidth;
+        let colorChannelIndex = 0;
+        for (const colorGrid of this._colors) {
+            colorGrid.addRegion([d], 1, px, py, width, width, scale * color[colorChannelIndex++]);
+        }
+    }
+
     addDensityPush() {
         if (this._pushV == null || this._pushP == null) {
             return;
         }
-        const d = Math.max(glMatrix.vec2.length(this._pushV), 1.0);
-        const scale = constants.userAddDensityScale();
-        const width = this.getBoxWidth();
-        const color = smokeColors[this._colorIndex % smokeColors.length];
-        let colorChannelIndex = 0;
-        for (const colorGrid of this._colors) {
-            colorGrid.addRegion([d], 1, this._pushP[1], this._pushP[0], width, width, scale * color[colorChannelIndex++]);
+        this.addDensityBox(this._colorIndex, this._pushP, this._pushV);
+    }
+
+    addVelocityTouch() {
+        for (const touch of this._touches) {
+            this.addVelocityBox(touch.position, touch.velocity);
         }
+    }
+
+    addVelocityBox(position, velocity) {
+        console.log(position, velocity);
+        const scale = constants.userAddVelocityScale();
+        const width = this.getBoxWidth();
+        const halfWidth = Math.floor(width / 2);
+        const px = Math.floor(position[1]) - halfWidth;
+        const py = Math.floor(position[0]) - halfWidth;
+        this._velocity.addRegion(velocity, 2, px, py, width, width, scale);
     }
 
     addVelocityPush() {
         if (this._pushV == null || this._pushP == null) {
             return;
         }
-        const scale = constants.userAddVelocityScale();
-        const width = this.getBoxWidth();
-        this._velocity.addRegion(this._pushV, 2, this._pushP[1], this._pushP[0], width, width, scale);
+        this.addVelocityBox(this._pushP, this._pushV);
     }
 
     swapColor(index) {
@@ -192,6 +229,7 @@ export default class Fluids {
             this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
         }
         this.addVelocityPush();
+        this.addVelocityTouch();
     }
 
     projectVelocity() {

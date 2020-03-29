@@ -26,6 +26,7 @@ function handleLoad() {
     gameCanvas.addEventListener('mousedown', handleMouse, false);
     gameCanvas.addEventListener('mousemove', handleMouse, false);
     gameCanvas.addEventListener('mouseup', handleMouse, false);
+    setupTouch();
     incButton.addEventListener('click', incIter);
     stopButton.addEventListener('click', stopIter);
     playButton.addEventListener('click', playIter);
@@ -81,6 +82,55 @@ function handleMouse(e) {
     } else {
         fluidsInstance.setPush(null, null);
     }
+}
+
+// Thank you MDN https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+function touchListToMap(prevTouchList, currTouchList) {
+    var canvasBounds = gameCanvas.getBoundingClientRect();
+    let prevTouchMap = {};
+    let ids = [];
+    if (prevTouchList != null) {
+        for (let touch of prevTouchList) {
+            prevTouchMap[touch.identifier] = touch;
+            ids.push(touch.identifier);
+        }
+    }
+    let touchInfos = [];
+    for (let touch of currTouchList) {
+        let prevTouch = prevTouchMap[touch.identifier];
+        const px = (touch.clientX - canvasBounds.left) / displayScale;
+        const py = (touch.clientY - canvasBounds.top) / displayScale;
+        const hasPrev = prevTouch != null;
+        const vx = hasPrev ? (touch.clientX - prevTouch.clientX) / displayScale : 0;
+        const vy = hasPrev ? (touch.clientY - prevTouch.clientY) / displayScale : 0;
+        touchInfos.push({
+            "identifier": touch.identifier,
+            "position": [px, py],
+            "velocity": [vx, vy]
+        });
+    }
+    return touchInfos;
+}
+
+function setupTouch() {
+    let prevTouches = null;
+    let currTouches = null;
+    let handleTouch = (e) => {
+        if (e.cancelable) {
+            e.preventDefault();
+        } else {
+            return;
+        }
+        prevTouches = currTouches;
+        currTouches = e.touches;
+        if (currTouches != null) {
+            fluidsInstance.setTouches(touchListToMap(prevTouches, currTouches));
+        }
+    };
+    gameCanvas.addEventListener("touchstart", handleTouch, false);
+    gameCanvas.addEventListener("touchend", handleTouch, false);
+    gameCanvas.addEventListener("touchcancel", handleTouch, false);
+    gameCanvas.addEventListener("touchmove", handleTouch, false);
 }
 
 /**
