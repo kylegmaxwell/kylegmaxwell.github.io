@@ -85,7 +85,7 @@ function handleMouse(e) {
 }
 
 // Thank you MDN https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
-function touchListToMap(prevTouchList, currTouchList) {
+function touchListToMap(prevTouchList, currTouchList, touchIndexMap) {
     var canvasBounds = gameCanvas.getBoundingClientRect();
     let prevTouchMap = {};
     let ids = [];
@@ -103,8 +103,12 @@ function touchListToMap(prevTouchList, currTouchList) {
         const hasPrev = prevTouch != null;
         const vx = hasPrev ? (touch.clientX - prevTouch.clientX) / displayScale : 0;
         const vy = hasPrev ? (touch.clientY - prevTouch.clientY) / displayScale : 0;
+        const id = touchIndexMap[touch.identifier];
+        if (id == null) {
+            throw "Missing id";
+        }
         touchInfos.push({
-            "identifier": touch.identifier,
+            "identifier": id,
             "position": [px, py],
             "velocity": [vx, vy]
         });
@@ -115,22 +119,72 @@ function touchListToMap(prevTouchList, currTouchList) {
 function setupTouch() {
     let prevTouches = null;
     let currTouches = null;
-    let handleTouch = (e) => {
+    // This is a persistent map to track the lifetime of each touch
+    let touchIndexMap = {};
+    // JavaScript reuses indexes, but this index keeps growing to give each touch
+    // a unique identifier for mapping to color
+    let touchIndex = 0;
+    let handleTouch = (e, type) => {
         if (e.cancelable) {
             e.preventDefault();
         } else {
             return;
         }
+        // Reverse map of touch identifiers for just the current event
+        // Used to detect when a touch goes away
+        let reverseMap = {};
+        for (let t of e.touches) {
+            const id = t.identifier;
+            const mappedId = touchIndexMap[id];
+            if (mappedId != null) {
+                reverseMap[mappedId] = id;
+            }
+        }
+        if (type === "touchstart") {
+            // Add any new touches to the map
+            // they are new by definition if they are not in the map
+            for (let t of e.touches) {
+                const id = t.identifier;
+                const mappedId = touchIndexMap[id];
+                if (mappedId == null) {
+                    touchIndexMap[id] = touchIndex++;
+                }
+            }
+        } else if (type === "touchend" || type === "touchcancel") {
+            // Check touch index and clean up any missing touches
+            // The touches have ended by definition if they are missing
+            let keys = Object.keys(touchIndexMap);
+            for (let key of keys) {
+                if (reverseMap[touchIndexMap[key]] == null) {
+                    touchIndexMap[key] = undefined;
+                }
+
+            }
+        } else if (type === "touchmove") {
+            // No additional custom behavior for touch move events at the moment
+        }
         prevTouches = currTouches;
         currTouches = e.touches;
         if (currTouches != null) {
-            fluidsInstance.setTouches(touchListToMap(prevTouches, currTouches));
+            fluidsInstance.setTouches(touchListToMap(prevTouches, currTouches, touchIndexMap));
         }
     };
-    gameCanvas.addEventListener("touchstart", handleTouch, false);
-    gameCanvas.addEventListener("touchend", handleTouch, false);
-    gameCanvas.addEventListener("touchcancel", handleTouch, false);
-    gameCanvas.addEventListener("touchmove", handleTouch, false);
+    gameCanvas.addEventListener("touchstart", (e) => {
+        const type = "touchstart";
+        handleTouch(e, type);
+    }, false);
+    gameCanvas.addEventListener("touchend", (e) => {
+        const type = "touchend";
+        handleTouch(e, type);
+    }, false);
+    gameCanvas.addEventListener("touchcancel", (e) => {
+        const type = "touchcancel";
+        handleTouch(e, type);
+    }, false);
+    gameCanvas.addEventListener("touchmove", (e) => {
+        const type = "touchmove";
+        handleTouch(e, type);
+    }, false);
 }
 
 /**
