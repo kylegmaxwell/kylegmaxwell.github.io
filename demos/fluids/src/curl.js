@@ -18,7 +18,7 @@ export function noise3(x, y, z) {
     return v;
 }
 
-export function curl2(x, y, z) {
+export function curlNoise2(x, y, z) {
     const dx = differenceFraction() * noiseFrequency();
     const dy = differenceFraction() * noiseFrequency();
     const dz = differenceFraction() * noiseFrequency();

@@ -1,13 +1,13 @@
 // Note gl-matrix creates a global object glMatrix
 // import * as glm from '../lib/gl-matrix.js'
 
-import { advectionScale } from './constants.js'
+import * as constants from './constants.js'
 
 let tmpV = glMatrix.vec2.create();
 let tmpSample2 = glMatrix.vec2.create();
 
 export function advect1(dt, width, height, source, destination, velocities) {
-    const scale = advectionScale() * dt;
+    const scale = constants.advectionScale() * dt;
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
             const velocity = velocities.sample2(x, y, tmpSample2);
@@ -21,7 +21,7 @@ export function advect1(dt, width, height, source, destination, velocities) {
 // Advect colors by velocity to get movement
 // Both colors and velocities must be 2 components
 export function advect2(dt, width, height, source, destination, velocities) {
-    const scale = advectionScale() * dt;
+    const scale = constants.advectionScale() * dt;
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
             const velocity = velocities.sample2(x, y, tmpSample2);
@@ -34,12 +34,12 @@ export function advect2(dt, width, height, source, destination, velocities) {
 
 // diffusion based solver using Gauss-Seidel relaxation from Stam 03
 // @param diffusionScale - related to viscosity
-export function diffuse1(dt, diffusionScale, width, height, inDensity, outDensity) {
-    const a = dt * diffusionScale * width * height;
-    const NUM_ITERATIONS = 20;
-    for (let k = 0; k < NUM_ITERATIONS; k++) {
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
+export function diffuse1(dt, width, height, inDensity, outDensity) {
+    const a = dt * constants.diffusionScale() * width * height;
+    const iterationCount = constants.gaussSeidelIterations();
+    for (let k = 0; k < iterationCount; k++) {
+        for (let i = 1; i < width - 1; i++) {
+            for (let j = 1; j < height - 1; j++) {
                 // Evaluate this formula in terms of glmatrix operations
                 // outDensity = (inDensity + a*neighborsum)/(1+4*a);
 
@@ -61,13 +61,13 @@ export function diffuse1(dt, diffusionScale, width, height, inDensity, outDensit
 }
 
 // diffusion based solver using Gauss-Seidel relaxation from Stam 03
-export function diffuse2(dt, diffusionScale, width, height, inDensity, outDensity) {
-    const a = dt * diffusionScale * width * height;
-    const NUM_ITERATIONS = 20;
+export function diffuse2(dt, width, height, inDensity, outDensity) {
+    const a = dt * constants.diffusionScale() * width * height;
+    const iterationCount = constants.gaussSeidelIterations();
     let result = glMatrix.vec2.create();
-    for (let k = 0; k < NUM_ITERATIONS; k++) {
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
+    for (let k = 0; k < iterationCount; k++) {
+        for (let i = 1; i < width - 1; i++) {
+            for (let j = 1; j < height - 1; j++) {
                 // Evaluate this formula in terms of glmatrix operations
                 // outDensity = (inDensity + a*neighborsum)/(1+4*a);
                 result[0] = 0;
@@ -100,7 +100,6 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
     // Stam 03
     // div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] + v[IX(i, j + 1)] - v[IX(i, j - 1)]);
     // p[IX(i, j)] = 0;
-    // const h = 1.0;
     const h = 1.0 / Math.sqrt(width * height);
     for (let i = 0; i < width; i++) {
         for (let j = 0; j < height; j++) {
@@ -116,8 +115,8 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
 
     // Stam 03
     // p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] + p[IX(i, j - 1)] + p[IX(i, j + 1)]) / 4;
-    const NUM_ITERATIONS = 20;
-    for (let k = 0; k < NUM_ITERATIONS; k++) {
+    const iterationCount = constants.gaussSeidelIterations();
+    for (let k = 0; k < iterationCount; k++) {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
 

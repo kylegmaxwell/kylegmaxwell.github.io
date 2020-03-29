@@ -3,8 +3,8 @@
 // Note gl-matrix creates a global object glMatrix
 import * as glm from '../lib/gl-matrix.js'
 
-import { noise1, curl2 } from './curl.js'
-import { noiseFrequency } from './constants.js'
+import { noise1, curlNoise2 } from './curl.js'
+import * as constants from './constants.js'
 
 // hidden variables to save on re-allocation for every call
 let lerpTmV = glMatrix.vec2.create();
@@ -41,7 +41,7 @@ export default class Grid {
     static makeCurlGrid(width, height, z, scale) {
         const frequency = 1.0;
         return this.makeCustomGrid(width, height, 2, (x, y) => {
-            let curlVec = curl2(frequency * x, frequency * y, z);
+            let curlVec = curlNoise2(frequency * x, frequency * y, z);
             glMatrix.vec2.scale(curlVec, curlVec, scale);
             return curlVec;
         });
@@ -94,7 +94,7 @@ export default class Grid {
         for (let r = 0; r < this._height; r++) {
             for (let c = 0; c < this._width; c++) {
                 const index = this.toIndexRowColumn(r, c);
-                const frequency = noiseFrequency();
+                const frequency = constants.noiseFrequency();
                 const sampleX = frequency * c;
                 const sampleY = frequency * r;
                 const vecValue = valueFunction(sampleX, sampleY);

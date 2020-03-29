@@ -23,6 +23,29 @@ export function noiseSpeed() {
     return 0.1;
 }
 
+export function noiseMagnitude() {
+    return 2.0;
+}
+
 export function diffusionScale() {
-    return 0.0005;
+    return 0.0001;
+}
+
+export function gaussSeidelIterations() {
+    return 20;
+}
+
+export function userAddDensityScale() {
+    return 0.1;
+}
+
+export function userAddVelocityScale() {
+    return 0.5;
+}
+
+export function noiseModeColorDamping() {
+    return 0.95;
+}
+export function advectModeColorDamping() {
+    return 0.98;
 }
