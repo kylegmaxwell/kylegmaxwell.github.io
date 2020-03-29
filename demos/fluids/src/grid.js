@@ -1,7 +1,7 @@
 // Grid class module
 
 // Note gl-matrix creates a global object glMatrix
-import * as glm from '../lib/gl-matrix.js'
+// import * as glm from '../lib/gl-matrix.js'
 
 import { noise1, curlNoise2 } from './curl.js'
 import * as constants from './constants.js'

@@ -36,7 +36,7 @@ export function advect2(dt, width, height, source, destination, velocities) {
 // @param diffusionScale - related to viscosity
 export function diffuse1(dt, width, height, inDensity, outDensity) {
     const a = dt * constants.diffusionScale() * width * height;
-    const iterationCount = constants.gaussSeidelIterations();
+    const iterationCount = constants.gaussSeidelIterations() / 2; // speed things up a little with fewer iterations
     for (let k = 0; k < iterationCount; k++) {
         for (let i = 1; i < width - 1; i++) {
             for (let j = 1; j < height - 1; j++) {

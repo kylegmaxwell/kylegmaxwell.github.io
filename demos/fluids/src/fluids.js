@@ -2,10 +2,30 @@
 
 import * as solve from './solve.js'
 import Grid from './grid.js'
-// import { noise1 } from './curl.js';
+import { noise13 } from './curl.js';
 import * as constants from './constants.js';
 
 let tmpV = glMatrix.vec2.create();
+
+const smokeColors = [
+    // [1.0, 1.0, 1.0],//white
+    [1.0, 0.1, 0.1],//red
+    [0.1, 1.0, 0.1],//green
+    [0.1, 0.1, 1.0],//blue
+
+    [1.0, 0.5, 0.1],//orange
+    [0.5, 1.0, 0.1],//lime
+
+    [0.1, 1.0, 0.5],//aqua
+    [0.1, 0.5, 1.0],//sky
+
+    [0.5, 0.1, 1.0],//purple
+    [1.0, 0.1, 0.5],//pink
+
+    [1.0, 1.0, 0.1],//yellow
+    [1.0, 0.1, 1.0],//magenta
+    [0.1, 1.0, 1.0]//cyan
+];
 
 /**
  * Convert a number to 8 bit int.
@@ -47,15 +67,22 @@ export default class Fluids {
             that._seedColor.set1(c, r, magnitude);
         });
 
-        this._color = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorRed = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorGreen = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorBlue = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colors = [this._colorRed, this._colorGreen, this._colorBlue]
         this._black = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         // Temporary buffer for advection operations
-        this._colorSwap = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorRedSwap = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorGreenSwap = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorBlueSwap = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._colorSwaps = [this._colorRedSwap, this._colorGreenSwap, this._colorBlueSwap]
         this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
         this._divergence = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._pressure = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._useVorticityConfinement = true;
         this._addExtraFluidSources = true;
+        this._colorIndex = 0;
     }
 
     setUseVorticityConfinement(enable) {
@@ -104,26 +131,35 @@ export default class Fluids {
             // Copy a patch from the seed grid at an interesting location
             const boxWidth = this.getBoxWidth();
             const boxOffset = this.getBoxOffset();
-            this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
+            for (const colorGrid of this._colors) {
+                colorGrid.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
+            }
             const boxBorder = Math.floor(boxWidth * 0.2);
-            this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+            for (const colorGrid of this._colors) {
+                colorGrid.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+            }
         }
         this.addDensityPush();
     }
 
-    setPush(v, p) {
+    setPush(v, p, dragIndex) {
         this._pushV = v;//velocity
         this._pushP = p;//position
+        this._colorIndex = dragIndex;
     }
 
     addDensityPush() {
         if (this._pushV == null || this._pushP == null) {
             return;
         }
-        let d = glMatrix.vec2.length(this._pushV);
+        const d = Math.max(glMatrix.vec2.length(this._pushV), 1.0);
         const scale = constants.userAddDensityScale();
         const width = this.getBoxWidth();
-        this._color.addRegion([d], 1, this._pushP[1], this._pushP[0], width, width, scale);
+        const color = smokeColors[this._colorIndex % smokeColors.length];
+        let colorChannelIndex = 0;
+        for (const colorGrid of this._colors) {
+            colorGrid.addRegion([d], 1, this._pushP[1], this._pushP[0], width, width, scale * color[colorChannelIndex++]);
+        }
     }
 
     addVelocityPush() {
@@ -135,11 +171,11 @@ export default class Fluids {
         this._velocity.addRegion(this._pushV, 2, this._pushP[1], this._pushP[0], width, width, scale);
     }
 
-    swapColor() {
+    swapColor(index) {
         // swap pointers
-        let tmp = this._color;
-        this._color = this._colorSwap;
-        this._colorSwap = tmp;
+        let tmp = this._colors[index];
+        this._colors[index] = this._colorSwaps[index];
+        this._colorSwaps[index] = tmp;
     }
 
     swapVelocity() {
@@ -196,20 +232,21 @@ export default class Fluids {
     }
 
     updateDensity(dt) {
-        if (this._velocityMode === "noise") {
-            // Fade the previous colors
-            this._color.dampen(constants.noiseModeColorDamping());
-        } else if (this._velocityMode === "advect") {
-            // Hack, remove density a little bit
-            this._color.dampen(constants.advectModeColorDamping());
+        for (let index = 0; index < this._colors.length; index++) {
+            if (this._velocityMode === "noise") {
+                // Fade the previous colors
+                this._colors[index].dampen(constants.noiseModeColorDamping());
+            } else if (this._velocityMode === "advect") {
+                // Hack, remove density a little bit
+                this._colors[index].dampen(constants.advectModeColorDamping());
 
-            solve.diffuse1(dt, this._width, this._height, this._color, this._colorSwap);
-            this.swapColor();
+                solve.diffuse1(dt, this._width, this._height, this._colors[index], this._colorSwaps[index]);
+                this.swapColor(index);
+            }
+            // advect color into swap using velocity
+            solve.advect1(dt, this._width, this._height, this._colors[index], this._colorSwaps[index], this._velocity);
+            this.swapColor(index);
         }
-        // advect color into swap using velocity
-        solve.advect1(dt, this._width, this._height, this._color, this._colorSwap, this._velocity);
-        this.swapColor();
-
         // Add density
         this.addDensity();
     }
@@ -246,15 +283,16 @@ export default class Fluids {
                 const index = this.toDisplayPixelIndex(x, y, displayScale);
                 if (this._renderMode === "density") {
                     const densityScale = constants.renderScale();
-                    const v = densityScale * this._color.sample1Interp(xScaled, yScaled);
-                    if (isNaN(v)) {
-                        throw "NaN render v"
-                    } if (v < 0) {
-                        throw "negative v"
+                    let indexOffset = 0;
+                    for (const colorGrid of this._colors) {
+                        const v = densityScale * colorGrid.sample1Interp(xScaled, yScaled);
+                        if (isNaN(v)) {
+                            throw "NaN render v"
+                        } if (v < 0) {
+                            throw "negative v"
+                        }
+                        pixels[index + indexOffset++] = toFixed(v);
                     }
-                    pixels[index + 0] = toFixed(v);
-                    pixels[index + 1] = toFixed(v);
-                    pixels[index + 2] = toFixed(v);
                 } else {
                     const v = this._velocity.sample2Interp(xScaled, yScaled, tmpV);
                     const velocityScale = constants.renderScale();

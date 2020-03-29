@@ -55,7 +55,8 @@ function handleLoad() {
 let dragV = glMatrix.vec2.create();
 let prevP = glMatrix.vec2.create();
 let mouseP = glMatrix.vec2.create();
-var inDrag = false;
+let inDrag = false;
+let dragIndex = 0;
 function handleMouse(e) {
 
     if (e.type === 'mousedown') {
@@ -66,6 +67,7 @@ function handleMouse(e) {
         prevP[1] = mouseP[1];
     } else if (e.type === 'mouseup') {
         inDrag = false;
+        dragIndex++;
     } else if (e.type === 'mousemove') {
         prevP[0] = mouseP[0];
         prevP[1] = mouseP[1];
@@ -75,7 +77,7 @@ function handleMouse(e) {
     if (inDrag) {
         dragV[0] = mouseP[0] - prevP[0];
         dragV[1] = mouseP[1] - prevP[1];
-        fluidsInstance.setPush(dragV, mouseP);
+        fluidsInstance.setPush(dragV, mouseP, dragIndex);
     } else {
         fluidsInstance.setPush(null, null);
     }

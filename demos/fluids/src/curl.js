@@ -1,20 +1,28 @@
 
-import noise from '../lib/perlin.js'
+import perlinNoise from '../lib/perlin.js'
 
 // Note gl-matrix creates a global object glMatrix
-import * as glm from '../lib/gl-matrix.js'
+// import * as glm from '../lib/gl-matrix.js'
 
 import { noiseFrequency, differenceFraction } from './constants.js'
 
 export function noise1(x, y, z) {
-    return noise(x, y, z);
+    return perlinNoise(x, y, z);
+}
+
+export function noise13(x) {
+    return [
+        perlinNoise(x * 0.7),
+        perlinNoise(x * 12.5),
+        perlinNoise(x * 765.3)
+    ];
 }
 
 export function noise3(x, y, z) {
     let v = glMatrix.vec3.create();
-    v[0] = noise(x, y, z);
-    v[1] = noise(x + 1234, y + 7777, z);
-    v[2] = noise(x + 76543, y + 11111, z);
+    v[0] = perlinNoise(x, y, z);
+    v[1] = perlinNoise(x + 1234, y + 7777, z);
+    v[2] = perlinNoise(x + 76543, y + 11111, z);
     return v;
 }
 
