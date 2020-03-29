@@ -142,9 +142,9 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
             //copy to next matrix w/o divergance
             let vel = ioVelocity.sample2(i, j, tmpSample2);
 
-            vel.x = vel.x - 0.5 *
+            vel[0] = vel[0] - 0.5 *
                 (ioPressure.sample1(i + 1, j) - ioPressure.sample1(i - 1, j)) / h;
-            vel.y = vel.y - 0.5 *
+            vel[1] = vel[1] - 0.5 *
                 (ioPressure.sample1(i, j + 1) - ioPressure.sample1(i, j - 1)) / h;
 
             ioVelocity.set2(i, j, vel);
