@@ -54,6 +54,16 @@ export default class Fluids {
         this._velocitySwap = Grid.makeCustomGrid(this._width, this._height, 2, () => { return glMatrix.vec2.create(); });
         this._divergence = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
         this._pressure = Grid.makeUniformGrid1Channel(this._width, this._height, 0);
+        this._useVorticityConfinement = true;
+        this._addExtraFluidSources = true;
+    }
+
+    setUseVorticityConfinement(enable) {
+        this._useVorticityConfinement = enable;
+    }
+
+    setAddExtraFluidSources(enable) {
+        this._addExtraFluidSources = enable;
     }
 
     initVelocityCache() {
@@ -90,12 +100,14 @@ export default class Fluids {
     }
 
     addDensity() {
-        // Copy a patch from the seed grid at an interesting location
-        const boxWidth = this.getBoxWidth();
-        const boxOffset = this.getBoxOffset();
-        this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
-        const boxBorder = Math.floor(boxWidth * 0.2);
-        this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+        if (this._addExtraFluidSources) {
+            // Copy a patch from the seed grid at an interesting location
+            const boxWidth = this.getBoxWidth();
+            const boxOffset = this.getBoxOffset();
+            this._color.copySubGrid(this._seedColor, boxOffset, boxOffset, boxWidth, boxWidth);
+            const boxBorder = Math.floor(boxWidth * 0.2);
+            this._color.copySubGrid(this._black, boxOffset + boxBorder, boxOffset + boxBorder, boxWidth - 2 * boxBorder, boxWidth - 2 * boxBorder);
+        }
         this.addDensityPush();
     }
 
@@ -138,9 +150,11 @@ export default class Fluids {
     }
 
     addVelocity() {
-        const boxWidth = this.getBoxWidth();
-        const boxOffset = this.getBoxOffset();
-        this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
+        if (this._addExtraFluidSources) {
+            const boxWidth = this.getBoxWidth();
+            const boxOffset = this.getBoxOffset();
+            this._velocity.copySubGrid(this._seedVelocity, boxOffset, boxOffset, boxWidth, boxWidth);
+        }
         this.addVelocityPush();
     }
 
@@ -175,7 +189,9 @@ export default class Fluids {
 
             this.projectVelocity();
 
-            solve.vorticityConfinement(dt, this._width, this._height, this._velocity);
+            if (this._useVorticityConfinement) {
+                solve.vorticityConfinement(dt, this._width, this._height, this._velocity);
+            }
         }
     }
 

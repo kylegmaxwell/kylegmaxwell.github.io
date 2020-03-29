@@ -5,7 +5,6 @@ import * as constants from './constants.js'
 
 var fluidsInstance = null;
 var ctx = null;
-var paintMode = false;
 var renderRequest = null;
 var lastRenderTime = null;
 
@@ -104,6 +103,11 @@ function updateRes() {
     resetGame();
 }
 
+function setParametersFromGui() {
+    fluidsInstance.setUseVorticityConfinement(vorticityConfinementCheckbox.checked);
+    fluidsInstance.setAddExtraFluidSources(extraFluidSourcesCheckbox.checked);
+}
+
 function updateSimulation() {
     if (!fluidsInstance) {
         return;
@@ -128,6 +132,7 @@ function updateSimulation() {
     // Wait until enough time has elapsed to solve and render no more than FPS
     if (delta > minDtS) {
         deltaTimeInput.value = delta;
+        setParametersFromGui();
         fluidsInstance.step(delta);
         elapsedTimeInput.value = fluidsInstance._simulationTimeElapsed;
         render();
@@ -178,7 +183,6 @@ function updateVelocityMode() {
 
 function resetGame() {
     lastRenderTime = null;
-    paintMode = !!paintCheck.checked;
     const width = gameCanvas.width / displayScale;
     const height = gameCanvas.height / displayScale;
     fluidsInstance = new Fluids(height, width);
