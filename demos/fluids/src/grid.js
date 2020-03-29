@@ -167,6 +167,16 @@ export default class Grid {
         }
     }
 
+    getCurl2(x, y) {
+        if (this._channels !== 2) {
+            throw "Wrong sample function";
+        }
+        // partial of channel0 with respect to y
+        const d0dy = this.get(x, y + 1, 0) - this.get(x, y - 1, 0);
+        const d1dx = this.get(x - 1, y, 1) - this.get(x + 1, y, 1);
+        return d0dy + d1dx;
+    }
+
     setBoundary(channelCount) {
         // vector velocity has slightly different boundary conditions
         const isV = channelCount === 2;
@@ -215,6 +225,9 @@ export default class Grid {
         if (channel >= this._channels) {
             throw "Invalid channel index";
         }
+        if (isNaN(value)) {
+            throw ("Nan value in set");
+        }
         const index = this.toIndexXYC(x, y, channel);
         this._dataArray[index] = value;
     }
@@ -231,6 +244,9 @@ export default class Grid {
         if (this._channels !== 1) {
             throw "Wrong sample function";
         }
+        if (isNaN(value)) {
+            throw ("Nan value in set1");
+        }
         let index = this.toIndexXY(x, y);
         this._dataArray[index] = value;
     }
@@ -238,6 +254,9 @@ export default class Grid {
     set2(x, y, value) {
         if (this._channels !== 2) {
             throw "Wrong sample function";
+        }
+        if (isNaN(value[0] || isNaN(value[1]))) {
+            throw ("Nan value in set2");
         }
         let index = this.toIndexXY(x, y);
         this._dataArray[index + 0] = value[0];

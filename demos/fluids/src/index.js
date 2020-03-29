@@ -1,18 +1,19 @@
 'use strict';
 
 import Fluids from './fluids.js'
+import * as constants from './constants.js'
 
-var DEFAULT_ITER = 20;
 var fluidsInstance = null;
 var ctx = null;
 var paintMode = false;
-// Rendering is throttled to this frame rate
-var FPS = 15;
 var renderRequest = null;
 var lastRenderTime = null;
 
+// Rendering is throttled to this frame rate
+const FPS = constants.targetFramesPerSecond();
+
 // Ratio of canvas size / simulation grid size 
-var displayScale = 4.0;
+const displayScale = constants.displayScaleFromSimulationResolution();
 
 // Set up initial hook to start scripts after page loads
 document.addEventListener("DOMContentLoaded", handleLoad);
@@ -112,12 +113,21 @@ function updateSimulation() {
         lastRenderTime = currentTime;
     }
     // in milli seconds
-    const dt = currentTime - lastRenderTime;
-    // no more than 1, in seconds
-    const delta = Math.min(dt / 1000, 1.0);
+    const dtMs = currentTime - lastRenderTime;
+    // in seconds
+    const dtS = dtMs / 1000;
+    // in seconds
+    const minDtS = 1 / FPS;
+    const maxDtS = minDtS * constants.maxDeltaTimeRatio();
+
+    // The fluid solver is implicit, so it can handle large time steps, but
+    // vorticity confinement is explicit, so it can be unstable for large time steps.
+    // Here we limit ourselves to at most twice the normal step to prevent instability.
+    const delta = Math.min(maxDtS, dtS);
 
     // Wait until enough time has elapsed to solve and render no more than FPS
-    if (delta > 1 / FPS) {
+    if (delta > minDtS) {
+        deltaTimeInput.value = delta;
         fluidsInstance.step(delta);
         elapsedTimeInput.value = fluidsInstance._simulationTimeElapsed;
         render();

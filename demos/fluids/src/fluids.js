@@ -175,9 +175,7 @@ export default class Fluids {
 
             this.projectVelocity();
 
-            //TODO
-            // vorticity confinement
-
+            solve.vorticityConfinement(dt, this._width, this._height, this._velocity);
         }
     }
 

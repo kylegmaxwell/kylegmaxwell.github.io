@@ -94,7 +94,8 @@ export function diffuse2(dt, width, height, inDensity, outDensity) {
     }
 }
 
-// Solve sparse system (Poisson equation) using Gauss-Seidel relaxation (Stam 03)
+// Solve sparse system (Poisson equation) using Gauss-Seidel relaxation
+// Based on Real-Time Fluid Dynamics for Games (Stam 03)
 export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
 
     // Stam 03
@@ -151,4 +152,52 @@ export function project(width, height, ioVelocity, ioPressure, ioDivergence) {
     }
     ioVelocity.setBoundary(2);
 
+}
+
+// I came up with this slightly hacky function to limit vorticity confinement so that it can not introduce instability
+function limitedSum(value, delta) {
+    // For large dt the voriticty can grow unboundedly and become unstable
+    // Limit it to prevent that.
+    const absValue = Math.abs(value);
+    const absDelta = Math.abs(delta);
+    const maxRatio = 0.99;
+    if (value === 0 || delta === 0) {
+        return value;
+    }
+    // opposite sign
+    if ((value > 0 && delta < 0) || (value < 0 && delta > 0)) {
+        if ((absDelta / absValue) > maxRatio) {
+            return value + maxRatio * value;
+        } else {
+            return value + delta;
+        }
+    } else { // same sign
+        // Don't allow voticity confinement to increase velocity
+        return value;
+    }
+}
+
+// Based on:
+// https://softologyblog.wordpress.com/2019/03/13/vorticity-confinement-for-eulerian-fluid-simulations/
+// https://www.youtube.com/watch?v=TxxZ8gkGNAc
+export function vorticityConfinement(dt, width, height, ioVelocity) {
+    const vorticity = constants.vorticityConfinementMagnitude();
+    const minCurlOffset = 1e-5;
+    for (let x = 2; x < width - 3; x++) {
+        for (let y = 2; y < height - 3; y++) {
+            const dx = Math.abs(ioVelocity.getCurl2(x + 0, y - 1)) - Math.abs(ioVelocity.getCurl2(x + 0, y + 1));
+            const dy = Math.abs(ioVelocity.getCurl2(x + 1, y + 0)) - Math.abs(ioVelocity.getCurl2(x - 1, y + 0));
+            const mag = Math.sqrt(dx * dx + dy * dy) + minCurlOffset;
+            const dxScaled = vorticity / mag * dx;
+            const dyScaled = vorticity / mag * dy;
+
+            const vx = ioVelocity.get(x, y, 0)
+            const dvx = dt * ioVelocity.getCurl2(x, y) * dxScaled;
+            ioVelocity.set(x, y, 0, limitedSum(vx, dvx));
+
+            const vy = ioVelocity.get(x, y, 1)
+            const dvy = dt * ioVelocity.getCurl2(x, y) * dyScaled
+            ioVelocity.set(x, y, 1, limitedSum(vy, dvy));
+        }
+    }
 }

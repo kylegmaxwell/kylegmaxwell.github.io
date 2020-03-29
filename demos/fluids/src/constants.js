@@ -36,7 +36,7 @@ export function gaussSeidelIterations() {
 }
 
 export function userAddDensityScale() {
-    return 0.1;
+    return 0.2;
 }
 
 export function userAddVelocityScale() {
@@ -48,4 +48,20 @@ export function noiseModeColorDamping() {
 }
 export function advectModeColorDamping() {
     return 0.98;
+}
+
+export function vorticityConfinementMagnitude() {
+    return 5.0;
+}
+
+export function displayScaleFromSimulationResolution() {
+    return 5.0;
+}
+
+export function targetFramesPerSecond() {
+    return 15;
+}
+
+export function maxDeltaTimeRatio() {
+    return 2.0;
 }
