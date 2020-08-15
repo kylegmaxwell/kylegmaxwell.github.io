@@ -60,8 +60,8 @@ var links = [
         "title": "box2d physics experiment",
         "img": "tile-ballpit.png"
     }, {
-        "url": "https://time-sweeper.herokuapp.com",
-        "title": "game app with oauth login",
+        "url": "demos/time-sweeper",
+        "title": "time sweeper game",
         "img": "tile-timesweeper.png"
     }, {
         "url": "https://slice-check.herokuapp.com",
