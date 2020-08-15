@@ -62,8 +62,6 @@ function handleLoad() {
         game.reset(difficuly);
         resizeCanvas();
     });
-
-    checkLogin();
 }
 
 /**
@@ -94,80 +92,21 @@ function runTests() {
 }
 
 /**
- * Update UI according to login state.
- * Save and load buttons are disabled unless logged in.
- */
-function checkLogin() {
-    loadButton.disabled = true;
-    saveButton.disabled = true;
-
-    getRequest("/me", function () {
-        if (this.responseText !== '') {
-            loadButton.disabled = false;
-            saveButton.disabled = false;
-        }
-    });
-}
-/**
- * Navigate to the authentication route
- * The server then redirects to facebook.
- * After successful auth, the user is redirected back.
- */
-function doLogin() {
-    window.location.pathname = '/auth/facebook'
-}
-
-/**
- * Post the game data to the server via xhr.
+ * Save to local storage.
  */
 function saveGame() {
-    saveButton.disabled = true;
     var gameState = JSON.stringify(game);
-    postRequest('/save', gameState, function () {
-        console.log(this.responseText);
-        saveButton.disabled = false;
-    });
-}
-
-/**
- * Helper function for POST requests
- * @param  {String}   path     Path to the API endpoint
- * @param  {String}   data     The payload for the request body
- * @param  {Function} callback Function to execute on request completion
- */
-function postRequest(path, data, callback) {
-    var xhr = new XMLHttpRequest();   // new HttpRequest instance
-    xhr.addEventListener("load", callback);
-    xhr.open("POST", path);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({ "data": data }));
+    localStorage.setItem('time-sweeper-game-state', gameState);
 }
 
 /**
  * Get the game data from the server via xhr.
  */
 function loadGame() {
-    loadButton.disabled = true;
-    getRequest("/load", function () {
-        if (this.responseText === 'Not logged in') {
-            console.log(this.responseText);
-        } else {
-            var responseObj = JSON.parse(JSON.parse(this.responseText).data);
-            game.reload(responseObj);
-            resizeCanvas();
-        }
-        loadButton.disabled = false;
-    });
-}
-
-/**
- * Helper function for GET requests.
- * @param  {String}   path     Path to the API endpoint.
- * @param  {Function} callback The function to execute on request completion
- */
-function getRequest(path, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener("load", callback);
-    xhr.open("GET", path);
-    xhr.send();
+    var gameState = localStorage.getItem('time-sweeper-game-state');
+    if (gameState) {
+        var gameObj = JSON.parse(gameState);
+        game.reload(gameObj);
+        resizeCanvas();
+    }
 }
