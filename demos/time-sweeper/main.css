@@ -1,0 +1,44 @@
+body {
+    background-color: #A1B0C6
+}
+main {
+    min-width: 400px;
+    max-width: 1200px;
+    min-height: 400px;
+}
+section {
+    /*background-color: #DFE7F8;*/
+    border-radius: 8px;
+    padding: 0.5em;
+    /*margin: 1.0em;*/
+}
+a {
+    color: #2233CC;
+    text-decoration: none;
+}
+a:visited {
+    color: #1224B3;
+}
+
+canvas {
+    background-color: #888888;
+    border-radius: 8px;
+    margin-top: 1.0em;
+    /* Prevent canvas from being selected */
+    -moz-user-select: -moz-none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+canvas[status="1"] {
+    background-color: #88CC88;
+}
+
+canvas[status="-1"] {
+    background-color: #CC8888;
+}
+
+h2 {
+    margin: 0.25em;
+}
