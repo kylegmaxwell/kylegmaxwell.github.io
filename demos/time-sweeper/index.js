@@ -57,7 +57,7 @@ function handleLoad() {
 
     resizeCanvas();
 
-    difficultSelector.addEventListener('input', function(evt) {
+    difficultSelector.addEventListener('input', function (evt) {
         var difficuly = parseInt(this.value);
         game.reset(difficuly);
         resizeCanvas();
@@ -140,7 +140,7 @@ function postRequest(path, data, callback) {
     xhr.addEventListener("load", callback);
     xhr.open("POST", path);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({"data":data}));
+    xhr.send(JSON.stringify({ "data": data }));
 }
 
 /**

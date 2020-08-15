@@ -56,7 +56,7 @@ class Cell {
      * @return {String}   html color
      */
     static getColor(i) {
-        var colors = ['blue','green','red','deeppink','cyan','yellow','orange','pink'];
+        var colors = ['blue', 'green', 'red', 'deeppink', 'cyan', 'yellow', 'orange', 'pink'];
         return colors[i];
     }
 
@@ -107,7 +107,7 @@ class Cell {
         var delta = 0;
         if (this._isClicked)
             return delta;
-        this._isFlagged =! this._isFlagged;
+        this._isFlagged = !this._isFlagged;
         if (this._isMined) {
             delta = this._isFlagged ? 1 : -1
         }
@@ -120,9 +120,9 @@ class Cell {
      */
     explore() {
         if (!this._isFlagged)
-            this._isClicked=true;
+            this._isClicked = true;
         // else
-            // return -999;//bad value (avoid(0=empty,-1=mine))
+        // return -999;//bad value (avoid(0=empty,-1=mine))
         return this.isSatisfied();
     }
 
@@ -163,13 +163,13 @@ class Cell {
             if (this.isMined()) {
                 ctx.drawImage(bombImg, x, y, r, r);
             } else if (this._neighborMines > 0) {
-                ctx.fillStyle = Cell.getColor(this._neighborMines-1);
-                ctx.fillText(''+this._neighborMines, x+3, y+r-1);
+                ctx.fillStyle = Cell.getColor(this._neighborMines - 1);
+                ctx.fillText('' + this._neighborMines, x + 3, y + r - 1);
             }
         } else {
             ctx.drawImage(tileImg, 0, 0, 17, 17, x, y, r, r);
             if (this.isFlagged()) {
-                ctx.drawImage(flagImg, x+s, y+s, r-2*s, r-2*s);
+                ctx.drawImage(flagImg, x + s, y + s, r - 2 * s, r - 2 * s);
             }
         }
     }
@@ -182,12 +182,12 @@ class Cell {
         if (this.isMined()) {
             ctx.drawImage(bombImg, x, y, r, r);
         } else if (this._neighborMines > 0) {
-            ctx.fillStyle = Cell.getColor(this._neighborMines-1);
-            ctx.fillText(''+this._neighborMines, x+3, y+r-1);
+            ctx.fillStyle = Cell.getColor(this._neighborMines - 1);
+            ctx.fillText('' + this._neighborMines, x + 3, y + r - 1);
         }
 
         if (this.isFlagged()) {
-            ctx.drawImage(flagImg, x+s, y+s, r-2*s, r-2*s);
+            ctx.drawImage(flagImg, x + s, y + s, r - 2 * s, r - 2 * s);
         }
     }
 }

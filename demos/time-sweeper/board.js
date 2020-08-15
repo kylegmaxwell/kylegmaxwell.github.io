@@ -13,9 +13,9 @@ class Board {
         // The radius of a game cell in pixels
         this._cellSize = cellSize;
         // The amount of padding at the edge of the canvas
-        this._margin =  Math.floor(cellSize * 0.4);
-        this._numRows=numRows;
-        this._numCols=numCols;
+        this._margin = Math.floor(cellSize * 0.4);
+        this._numRows = numRows;
+        this._numCols = numCols;
 
         this._initGrid();
 
@@ -90,8 +90,8 @@ class Board {
     _initMinesFromArray(mines) {
         var count = 0;
         // var mines = this._numMines;
-        for (var r=0;r<this._numRows;r++) {
-            for (var c=0;c<this._numCols;c++) {
+        for (var r = 0; r < this._numRows; r++) {
+            for (var c = 0; c < this._numCols; c++) {
                 if (mines[r][c] === 1) {
                     this._grid[r][c].setMine();
                     count++;
@@ -106,7 +106,7 @@ class Board {
      * @return {Number} The width, in pixels
      */
     getCanvasWidth() {
-        return this._numCols * this._cellSize + 2*this._margin;
+        return this._numCols * this._cellSize + 2 * this._margin;
     }
 
     /**
@@ -114,7 +114,7 @@ class Board {
      * @return {Number} The height, in pixels
      */
     getCanvasHeight() {
-        return this._numRows * this._cellSize + 2*this._margin;
+        return this._numRows * this._cellSize + 2 * this._margin;
     }
 
     /**
@@ -122,9 +122,9 @@ class Board {
      */
     _initGrid() {
         this._grid = [];
-        for (var r=0;r<this._numRows;r++) {
+        for (var r = 0; r < this._numRows; r++) {
             this._grid.push([]);
-            for (var c=0;c<this._numCols;c++) {
+            for (var c = 0; c < this._numCols; c++) {
                 this._grid[r].push(new Cell());
             }
         }
@@ -135,8 +135,8 @@ class Board {
      * @param  {Array} gridData 2D Array of objects containing cell data
      */
     _reloadGrid(gridData) {
-        for (var r=0;r<this._numRows;r++) {
-            for (var c=0;c<this._numCols;c++) {
+        for (var r = 0; r < this._numRows; r++) {
+            for (var c = 0; c < this._numCols; c++) {
                 this._grid[r][c].reload(gridData[r][c]);
             }
         }
@@ -154,19 +154,18 @@ class Board {
     /**
      * Fill the first cells with the given number of mines, then shuffle them.
      */
-    _initMines()
-    {
+    _initMines() {
         var mines = this._numMines;
-        for (var r=0;r<this._numRows && mines>0;r++) {
-            for (var c=0;c<this._numCols && mines>0;c++) {
-                if (mines>0) {
+        for (var r = 0; r < this._numRows && mines > 0; r++) {
+            for (var c = 0; c < this._numCols && mines > 0; c++) {
+                if (mines > 0) {
                     mines--;
                     this._grid[r][c].setMine();
                 }
             }
         }
         var shuffles = 7;
-        for (var i=0;i<shuffles;i++) {
+        for (var i = 0; i < shuffles; i++) {
             this._shuffle();
         }
     }
@@ -189,29 +188,28 @@ class Board {
     _shuffle() {
         var temp, i, j, rr, cc;
         //swap each element with a random element
-        for (var r=0;r<this._numRows;r++)
-            for (var c=0;c<this._numCols;c++)
-            {
-                var temp=this._grid[r][c];
+        for (var r = 0; r < this._numRows; r++)
+            for (var c = 0; c < this._numCols; c++) {
+                var temp = this._grid[r][c];
                 rr = this._randInt(this._numRows);
                 cc = this._randInt(this._numCols);
-                this._grid[r][c]=this._grid[rr][cc];
-                this._grid[rr][cc]=temp;
+                this._grid[r][c] = this._grid[rr][cc];
+                this._grid[rr][cc] = temp;
             }
     }
 
     _calculateNeighbors() {
         // calculate the neighbor number of mines
-        for (var r=0;r<this._numRows;r++)
-        for (var c=0;c<this._numCols;c++) {
-            var cell = this._grid[r][c];
-            if (cell.isMined()) {
-                cell.incNumMines();
-                this._neighborFill(r, c, function (r, c, cell) {
+        for (var r = 0; r < this._numRows; r++)
+            for (var c = 0; c < this._numCols; c++) {
+                var cell = this._grid[r][c];
+                if (cell.isMined()) {
                     cell.incNumMines();
-                });
+                    this._neighborFill(r, c, function (r, c, cell) {
+                        cell.incNumMines();
+                    });
+                }
             }
-        }
     }
 
     /**
@@ -220,12 +218,12 @@ class Board {
      */
     toString() {
         var str = '';
-        for (var r=0;r<this._numRows;r++) {
-            for (var c=0;c<this._numCols;c++) {
+        for (var r = 0; r < this._numRows; r++) {
+            for (var c = 0; c < this._numCols; c++) {
                 if (this._grid[r][c].isMined()) {
-                    str = str+'X';
+                    str = str + 'X';
                 } else {
-                    str = str+'.';
+                    str = str + '.';
                 }
             }
             str = str + '\n';
@@ -239,17 +237,17 @@ class Board {
      * @param  {Number} space   Amount of space between tiles
      */
     draw(ctx, space) {
-        var radius = this._cellSize-2*space;
-        var x = this._margin+space;
-        var y = this._margin+space;
+        var radius = this._cellSize - 2 * space;
+        var x = this._margin + space;
+        var y = this._margin + space;
         var drawFunc = this._gameIsOver ? 'drawReveal' : 'draw';
-        for (var r=0;r<this._numRows;r++) {
-            for (var c=0;c<this._numCols;c++) {
+        for (var r = 0; r < this._numRows; r++) {
+            for (var c = 0; c < this._numCols; c++) {
                 this._grid[r][c][drawFunc](ctx, x, y, radius, space);
-                x+=this._cellSize;
+                x += this._cellSize;
             }
-            y+=this._cellSize;
-            x=this._margin+space;
+            y += this._cellSize;
+            x = this._margin + space;
         }
     }
 
@@ -257,18 +255,18 @@ class Board {
      * Draw the border lines between the cells
      * @param  {2D} ctx The drawing context
      */
-    drawLines (ctx) {
+    drawLines(ctx) {
         var y = this._margin;
-        for (var r=0;r<=this._numRows;r++) {
+        for (var r = 0; r <= this._numRows; r++) {
             ctx.moveTo(this._margin, y);
             ctx.lineTo(this.getCanvasWidth() - this._margin, y)
-            y+=this._cellSize;
+            y += this._cellSize;
         }
         var x = this._margin;
-        for (var c=0;c<=this._numCols;c++) {
+        for (var c = 0; c <= this._numCols; c++) {
             ctx.moveTo(x, this._margin);
             ctx.lineTo(x, this.getCanvasHeight() - this._margin)
-            x+=this._cellSize;
+            x += this._cellSize;
         }
     }
 
@@ -279,8 +277,8 @@ class Board {
      * @param  {Number}} func The callback to execute on the cell at the given coordinates
      */
     getCellFromScrenSpace(x, y, func) {
-        var col = Math.floor((x-this._margin) / this._cellSize);
-        var row = Math.floor((y-this._margin) / this._cellSize);
+        var col = Math.floor((x - this._margin) / this._cellSize);
+        var row = Math.floor((y - this._margin) / this._cellSize);
         var cell = null
         if (this._inBounds(row, col)) {
             cell = this._grid[row][col];
@@ -359,7 +357,7 @@ class Board {
      * @param  {Number} col  The column of the cell
      * @param  {Cell} cell The cell to explore
      */
-    _handleExplore (row, col, cell) {
+    _handleExplore(row, col, cell) {
         var wasExplored = cell.isClicked();
         this._exploreCell(cell);
         if ((cell.getNumMines() === 0 || wasExplored) && cell.isSatisfied()) {
@@ -397,11 +395,11 @@ class Board {
     _neighborFill(r, c, func) {
         if (!this._inBounds(r, c)) return;
         // For each neighbor
-        for (var i=-1;i<2;i++)
-            for (var j=-1;j<2;j++) {
+        for (var i = -1; i < 2; i++)
+            for (var j = -1; j < 2; j++) {
                 // count the mine in each of its neighbors
-                if (this._inBounds(r+i, c+j)) {
-                    func(r+i, c+j, this._grid[r+i][c+j]);
+                if (this._inBounds(r + i, c + j)) {
+                    func(r + i, c + j, this._grid[r + i][c + j]);
                 }
             }
     }

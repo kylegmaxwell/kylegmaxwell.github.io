@@ -1,13 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Games</title>
     <link rel="stylesheet" type="text/css" href="main.css">
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="images/favicon.ico">
 </head>
+
 <body onload="handleLoad()">
     <header>
         <h2>Time Sweeper!</h2>
@@ -16,9 +17,9 @@
         <section>
             <details>
                 <summary>Instructions</summary>
-                Tap any tile to reveal it's contents, and hope it's not a bomb.<br/>
-                Tap and hold to mark the tile as a bomb.<br/>
-                When an empty tile's neighboring mines have been marked, tap and hold to reveal its neighbors.<br/>
+                Tap any tile to reveal it's contents, and hope it's not a bomb.<br />
+                Tap and hold to mark the tile as a bomb.<br />
+                When an empty tile's neighboring mines have been marked, tap and hold to reveal its neighbors.<br />
             </details>
             <!-- This is where the game canvas will be rendered -->
             <canvas id="gameCanvas"></canvas>
@@ -26,18 +27,18 @@
 
         <section>
             <div>
-            Time: <span id="timeDisplay">0</span>
+                Time: <span id="timeDisplay">0</span>
             </div>
             <div>
-            Mines: <span id="minesDisplay">15</span>
+                Mines: <span id="minesDisplay">15</span>
             </div>
             <div>
-            Status: <span id="statusDisplay">Running</span>
+                Status: <span id="statusDisplay">Running</span>
             </div>
             <select id="difficultSelector">
-              <option value="0">Easy</option>
-              <option value="1">Medium</option>
-              <option value="2">Hard</option>
+                <option value="0">Easy</option>
+                <option value="1">Medium</option>
+                <option value="2">Hard</option>
             </select>
             <button type="button" id="loginButton" onclick="doLogin()">Login</button>
             <button type="button" id="saveButton" onclick="saveGame()">Save</button>
@@ -46,16 +47,16 @@
         </section>
 
         <section>
-            <a href="http://kylegmaxwell.com/demos/index.html">up</a> <br/>
+            <a href="http://kylegmaxwell.com/demos/index.html">up</a> <br />
         </section>
 
         <section hidden>
             <!-- Bomb is a sprite used by cell.js -->
             <!-- https://www.iconfinder.com/icons/1232/bomb_explosive_icon#size=128 -->
-            <img id="bombImg" src="bomb.ico" hidden>
-            <img id="tileImg" src="tile.png" hidden>
+            <img id="bombImg" src="images/bomb.ico" hidden>
+            <img id="tileImg" src="images/tile.png" hidden>
             <!-- https://www.iconfinder.com/icons/44253/flag_red_icon#size=32 -->
-            <img id="flagImg" src="flag.ico" hidden>
+            <img id="flagImg" src="images/flag.ico" hidden>
         </section>
 
     </main>
@@ -66,4 +67,5 @@
     <script src="game.js"></script>
     <script src="index.js"></script>
 </body>
+
 </html>

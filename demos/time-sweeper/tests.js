@@ -14,7 +14,7 @@ class Tests {
                 [1, 1, 0, 0, 0],
                 [0, 0, 1, 0, 0],
                 [0, 0, 0, 0, 0]
-             ],
+            ],
             [
                 [0, 1, 0, 0],
                 [1, 0, 0, 0],
@@ -39,7 +39,7 @@ class Tests {
         return mineFixtures[index];
     }
 
-    run () {
+    run() {
         console.log('Beginning Tests');
         this._cellSize = 20;
         this.test0();
@@ -132,7 +132,7 @@ class Tests {
     }
 
     static expectEqual(a, b) {
-        var message = 'Expected '+b+' but got '+a;
+        var message = 'Expected ' + b + ' but got ' + a;
         Tests.expect(a === b, message);
     }
 

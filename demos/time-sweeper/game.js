@@ -29,7 +29,7 @@ class Game {
      * @return {Array}          Rows, cols, mines
      */
     static getLevel(index) {
-        var levels = [[9,9,10],[16,16,40],[16,30,99]];
+        var levels = [[9, 9, 10], [16, 16, 40], [16, 30, 99]];
         return levels[index];
     }
 
@@ -52,8 +52,8 @@ class Game {
     setup(level, debug) {
         var cellSize = 20;
         this._createBoard(level, debug);
-        this._width=this._board.getCanvasWidth();
-        this._height=this._board.getCanvasHeight();
+        this._width = this._board.getCanvasWidth();
+        this._height = this._board.getCanvasHeight();
         this.styleContext();
         this._mouseTimeoutCallback = null;
         this._mouseTimeDelay = 300;
@@ -77,9 +77,9 @@ class Game {
             if (_this._board.gameIsOver()) return;
             _this._time++;
             _this._timeSpan.textContent = _this._time;
-            _this._timerCallback = setTimeout(function() {
+            _this._timerCallback = setTimeout(function () {
                 updateTimer();
-            },1000);
+            }, 1000);
             // TODO might need to cancel timer on reset
         }
         updateTimer();
@@ -89,10 +89,10 @@ class Game {
      * @param  {DomElement} The div into which the canvas goes
      */
     styleContext() {
-        this._ctx.shadowBlur=3;
-        this._ctx.shadowColor='#777777';
-        this._ctx.shadowOffsetX=1;
-        this._ctx.shadowOffsetY=1;
+        this._ctx.shadowBlur = 3;
+        this._ctx.shadowColor = '#777777';
+        this._ctx.shadowOffsetX = 1;
+        this._ctx.shadowOffsetY = 1;
         this._ctx.fillStyle = '#BBBBBB';
         this._ctx.font = '18px Monaco';
     }
@@ -133,8 +133,8 @@ class Game {
         this.styleContext();
 
         this._ctx.strokeStyle = '#666666';
-        this._ctx.lineWidth= 0;
-        this._ctx.lineCap= 'square';
+        this._ctx.lineWidth = 0;
+        this._ctx.lineCap = 'square';
 
         // Draw the clicked cell's contents
         this._board.draw(this._ctx, 1);
@@ -149,7 +149,7 @@ class Game {
      * If there is a pending click cancel it and return true
      * @return {Boolean} Whether the timeout was canceled
      */
-    _clearTimeout () {
+    _clearTimeout() {
 
         if (this._mouseTimeoutCallback != null) {
             clearTimeout(this._mouseTimeoutCallback);

@@ -36,17 +36,17 @@ class Node {
         var rad = 5;
 
         // Call moveTo to update the cursor so a polygon is not created across circles
-        ctx.moveTo(x,y);
+        ctx.moveTo(x, y);
 
         // Specify the arc to draw (it will actually be visible when fill is called)
-        ctx.arc(x, y, rad, 0, 2*Math.PI);
+        ctx.arc(x, y, rad, 0, 2 * Math.PI);
 
         var height = 20;
         if (this.left) {
-            this.left.draw(ctx, x-width, y+height, width/2)
+            this.left.draw(ctx, x - width, y + height, width / 2)
         }
         if (this.right) {
-            this.right.draw(ctx, x+width, y+height, width/2)
+            this.right.draw(ctx, x + width, y + height, width / 2)
         }
     }
 }
