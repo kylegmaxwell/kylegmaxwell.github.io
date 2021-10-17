@@ -56,10 +56,6 @@ var links = [
         "title": "interactive fractal app",
         "img": "tile-fractal.jpg"
     }, {
-        "url": "demos/ballpit/",
-        "title": "box2d physics experiment",
-        "img": "tile-ballpit.png"
-    }, {
         "url": "demos/time-sweeper",
         "title": "time sweeper game",
         "img": "tile-timesweeper.png"
@@ -68,13 +64,21 @@ var links = [
         "title": "visualize medical data",
         "img": "slice-check.png"
     }, {
-        "url": "demos/solar-system",
-        "title": "solar system simulation",
-        "img": "tile-solar.png"
-    }, {
         "url": "demos/fluids",
         "title": "colorful smoke simulation",
         "img": "tile-fluids.png"
+    }, {
+        "url": "demos/ballpit/",
+        "title": "box2d physics experiment",
+        "img": "tile-ballpit.png"
+    }, {
+        "url": "demos/orbit/",
+        "title": "orbit visualization",
+        "img": "tile-orbit.png"
+    }, {
+        "url": "demos/solar-system",
+        "title": "solar system simulation",
+        "img": "tile-solar.png"
     }, {
         "url": "demos/publications",
         "title": "publications",

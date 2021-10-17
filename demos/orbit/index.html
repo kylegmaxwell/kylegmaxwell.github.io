@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Orbit</title>
     <link rel="stylesheet" type="text/css" href="main.css">
     <link rel="stylesheet" type="text/css" href="../../styles/icon.css">
@@ -21,7 +21,9 @@
         <section>
             <details>
                 <summary>Instructions</summary>
-                ISS https://www.n2yo.com/satellite/?s=25544.<br />
+                Click and drag to rotate view around earth.
+                This is a view of the trajectory of the International Space Station (ISS) from October 17th 2021.
+                Data sourced from https://www.n2yo.com/satellite/?s=25544.<br />
             </details>
             <!-- This is where the Cesium canvas will be rendered -->
             <div id="cesiumContainer"></div>
@@ -39,6 +41,7 @@
     </main>
 
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.86/Build/Cesium/Cesium.js"></script>
+    <script src="https://unpkg.com/satellite.js@4.1.3/dist/satellite.js"></script>
 
     <script src="src/constants.js" type="module"></script>
     <script src="src/orbit.js" type="module"></script>
