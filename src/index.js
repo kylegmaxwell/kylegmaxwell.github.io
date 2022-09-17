@@ -60,7 +60,7 @@ var links = [
         "title": "time sweeper game",
         "img": "tile-timesweeper.png"
     }, {
-        "url": "https://slice-check.herokuapp.com",
+        "url": "https://slice-check.uc.r.appspot.com/",
         "title": "visualize medical data",
         "img": "slice-check.png"
     }, {
