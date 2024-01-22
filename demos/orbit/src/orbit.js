@@ -99,10 +99,7 @@ export default class Orbit {
             //Hide the base layer picker
             baseLayerPicker: false,
 
-            // Use OpenStreetMaps
-            imageryProvider: new Cesium.OpenStreetMapImageryProvider({
-                url: 'https://a.tile.openstreetmap.org/'
-            }),
+            shouldAnimate: true,
 
             skyAtmosphere: false
 
