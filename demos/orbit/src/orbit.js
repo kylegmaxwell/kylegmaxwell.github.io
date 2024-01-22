@@ -96,6 +96,12 @@ export default class Orbit {
             // Don't use this since it triggers Cesium ion warning about data provider.
             geocoder: false,
 
+            baseLayer: Cesium.ImageryLayer.fromProviderAsync(
+                Cesium.TileMapServiceImageryProvider.fromUrl(
+                    Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII")
+                )
+            ),
+
             //Hide the base layer picker
             baseLayerPicker: false,
 
