@@ -25,6 +25,6 @@
   },
   "homepage": "https://github.com/kylegmaxwell/kylegmaxwell.github.io#readme",
   "devDependencies": {
-    "express": "^4.19.2"
+    "express": "^4.21.0"
   }
 }
